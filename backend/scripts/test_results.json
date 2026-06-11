@@ -1,0 +1,124 @@
+[
+  {
+    "query": "What is LinuxONE?",
+    "top_k": 10,
+    "chunks_returned": 5,
+    "metrics": {
+      "initial_candidates": 20,
+      "after_similarity_filter": 5,
+      "after_reranking": 5,
+      "final_chunks": 5,
+      "pipeline_stages": [
+        {
+          "stage": "vector_search",
+          "chunks": 20
+        },
+        {
+          "stage": "similarity_filter",
+          "chunks": 5
+        },
+        {
+          "stage": "reranking",
+          "chunks": 5
+        },
+        {
+          "stage": "diversity_filter",
+          "chunks": 5
+        }
+      ],
+      "num_chunks": 5,
+      "avg_score": 2.4311750888824464,
+      "min_score": 0.54767906665802,
+      "max_score": 5.180931091308594,
+      "score_std": 1.7503074602004771,
+      "score_range": 4.633252024650574
+    },
+    "success": true,
+    "test_name": "Broad Query",
+    "expected": "Should handle high top_k well, return comprehensive info"
+  },
+  {
+    "query": "How do I configure TLS encryption on LinuxONE?",
+    "top_k": 10,
+    "success": false,
+    "error": "'avg_score'",
+    "test_name": "Specific Query",
+    "expected": "Should filter to TLS-specific content only"
+  },
+  {
+    "query": "What are the security and performance benefits of LinuxONE?",
+    "top_k": 10,
+    "chunks_returned": 10,
+    "metrics": {
+      "initial_candidates": 20,
+      "after_similarity_filter": 20,
+      "after_reranking": 20,
+      "final_chunks": 10,
+      "pipeline_stages": [
+        {
+          "stage": "vector_search",
+          "chunks": 20
+        },
+        {
+          "stage": "similarity_filter",
+          "chunks": 20
+        },
+        {
+          "stage": "reranking",
+          "chunks": 20
+        },
+        {
+          "stage": "diversity_filter",
+          "chunks": 10
+        }
+      ],
+      "num_chunks": 10,
+      "avg_score": 3.7661264181137084,
+      "min_score": 3.0684471130371094,
+      "max_score": 5.0365095138549805,
+      "score_std": 0.7686170563183712,
+      "score_range": 1.968062400817871
+    },
+    "success": true,
+    "test_name": "Multi-Aspect Query",
+    "expected": "Should return diverse chunks covering both aspects"
+  },
+  {
+    "query": "Tell me about quantum computing",
+    "top_k": 10,
+    "chunks_returned": 4,
+    "metrics": {
+      "initial_candidates": 20,
+      "after_similarity_filter": 4,
+      "after_reranking": 4,
+      "final_chunks": 4,
+      "pipeline_stages": [
+        {
+          "stage": "vector_search",
+          "chunks": 20
+        },
+        {
+          "stage": "similarity_filter",
+          "chunks": 4
+        },
+        {
+          "stage": "reranking",
+          "chunks": 4
+        },
+        {
+          "stage": "diversity_filter",
+          "chunks": 4
+        }
+      ],
+      "num_chunks": 4,
+      "avg_score": 0.4953918904066086,
+      "min_score": -1.5908381938934326,
+      "max_score": 3.446260929107666,
+      "score_std": 1.9038490136233888,
+      "score_range": 5.037099123001099
+    },
+    "success": true,
+    "test_name": "Edge Case",
+    "expected": "Should filter out most chunks, return few or none"
+  }
+]

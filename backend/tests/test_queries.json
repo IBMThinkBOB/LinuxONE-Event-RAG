@@ -1,0 +1,195 @@
+{
+  "test_queries": [
+    {
+      "id": 1,
+      "category": "broad",
+      "query": "What is LinuxONE?",
+      "expected_topics": ["LinuxONE", "IBM Z", "mainframe", "enterprise"],
+      "min_chunks": 5,
+      "max_chunks": 10,
+      "expected_behavior": "Should return comprehensive overview with multiple aspects",
+      "success_criteria": {
+        "min_similarity": 0.6,
+        "requires_diversity": true,
+        "answer_length_min": 500
+      }
+    },
+    {
+      "id": 2,
+      "category": "specific_technical",
+      "query": "How do I configure TLS encryption on LinuxONE?",
+      "expected_topics": ["TLS", "encryption", "security", "configuration"],
+      "min_chunks": 3,
+      "max_chunks": 8,
+      "expected_behavior": "Should return focused, actionable configuration steps",
+      "success_criteria": {
+        "min_similarity": 0.7,
+        "requires_diversity": false,
+        "answer_length_min": 400
+      }
+    },
+    {
+      "id": 3,
+      "category": "multi_aspect",
+      "query": "What are the security and performance benefits of LinuxONE?",
+      "expected_topics": ["security", "performance", "benefits"],
+      "min_chunks": 6,
+      "max_chunks": 10,
+      "expected_behavior": "Should cover BOTH security AND performance aspects",
+      "success_criteria": {
+        "min_similarity": 0.6,
+        "requires_diversity": true,
+        "answer_length_min": 600,
+        "must_contain": ["security", "performance"]
+      }
+    },
+    {
+      "id": 4,
+      "category": "ai_workloads",
+      "query": "How do I optimize AI workloads on LinuxONE?",
+      "expected_topics": ["AI", "machine learning", "optimization", "workloads"],
+      "min_chunks": 4,
+      "max_chunks": 8,
+      "expected_behavior": "Should provide AI-specific optimization guidance",
+      "success_criteria": {
+        "min_similarity": 0.65,
+        "requires_diversity": true,
+        "answer_length_min": 500
+      }
+    },
+    {
+      "id": 5,
+      "category": "high_availability",
+      "query": "How does LinuxONE ensure high availability?",
+      "expected_topics": ["high availability", "resilience", "uptime", "failover"],
+      "min_chunks": 4,
+      "max_chunks": 8,
+      "expected_behavior": "Should explain HA mechanisms and features",
+      "success_criteria": {
+        "min_similarity": 0.65,
+        "requires_diversity": true,
+        "answer_length_min": 450
+      }
+    },
+    {
+      "id": 6,
+      "category": "frameworks",
+      "query": "What AI frameworks are supported on LinuxONE?",
+      "expected_topics": ["AI frameworks", "TensorFlow", "PyTorch", "support"],
+      "min_chunks": 3,
+      "max_chunks": 7,
+      "expected_behavior": "Should list specific frameworks with details",
+      "success_criteria": {
+        "min_similarity": 0.7,
+        "requires_diversity": false,
+        "answer_length_min": 350
+      }
+    },
+    {
+      "id": 7,
+      "category": "financial_services",
+      "query": "How is LinuxONE beneficial for financial institutions?",
+      "expected_topics": ["financial", "banking", "security", "compliance"],
+      "min_chunks": 5,
+      "max_chunks": 9,
+      "expected_behavior": "Should highlight financial industry benefits",
+      "success_criteria": {
+        "min_similarity": 0.65,
+        "requires_diversity": true,
+        "answer_length_min": 500
+      }
+    },
+    {
+      "id": 8,
+      "category": "security_features",
+      "query": "What are the security features of LinuxONE?",
+      "expected_topics": ["security", "encryption", "isolation", "compliance"],
+      "min_chunks": 5,
+      "max_chunks": 10,
+      "expected_behavior": "Should enumerate multiple security features",
+      "success_criteria": {
+        "min_similarity": 0.65,
+        "requires_diversity": true,
+        "answer_length_min": 550
+      }
+    },
+    {
+      "id": 9,
+      "category": "edge_case_low_relevance",
+      "query": "Tell me about quantum computing",
+      "expected_topics": [],
+      "min_chunks": 0,
+      "max_chunks": 3,
+      "expected_behavior": "Should acknowledge limited information, not hallucinate",
+      "success_criteria": {
+        "min_similarity": 0.3,
+        "requires_diversity": false,
+        "answer_length_min": 100,
+        "should_acknowledge_limitation": true
+      }
+    },
+    {
+      "id": 10,
+      "category": "multi_question",
+      "query": "How is LinuxONE beneficial for financial institutions? What makes me sure I can trust it with my data security?",
+      "expected_topics": ["financial", "security", "trust", "compliance", "encryption"],
+      "min_chunks": 6,
+      "max_chunks": 10,
+      "expected_behavior": "Should answer BOTH questions comprehensively",
+      "success_criteria": {
+        "min_similarity": 0.6,
+        "requires_diversity": true,
+        "answer_length_min": 700,
+        "must_contain": ["financial", "security", "trust"]
+      }
+    },
+    {
+      "id": 11,
+      "category": "deployment",
+      "query": "How do I deploy containerized applications on LinuxONE?",
+      "expected_topics": ["containers", "Docker", "Kubernetes", "deployment"],
+      "min_chunks": 4,
+      "max_chunks": 8,
+      "expected_behavior": "Should provide deployment guidance",
+      "success_criteria": {
+        "min_similarity": 0.65,
+        "requires_diversity": true,
+        "answer_length_min": 450
+      }
+    },
+    {
+      "id": 12,
+      "category": "comparison",
+      "query": "What makes LinuxONE different from x86 servers?",
+      "expected_topics": ["comparison", "architecture", "performance", "reliability"],
+      "min_chunks": 5,
+      "max_chunks": 9,
+      "expected_behavior": "Should highlight key differentiators",
+      "success_criteria": {
+        "min_similarity": 0.6,
+        "requires_diversity": true,
+        "answer_length_min": 500
+      }
+    }
+  ],
+  "metadata": {
+    "version": "1.0",
+    "created": "2026-06-08",
+    "total_queries": 12,
+    "categories": [
+      "broad",
+      "specific_technical",
+      "multi_aspect",
+      "ai_workloads",
+      "high_availability",
+      "frameworks",
+      "financial_services",
+      "security_features",
+      "edge_case_low_relevance",
+      "multi_question",
+      "deployment",
+      "comparison"
+    ],
+    "purpose": "Comprehensive test suite for RAG retrieval quality evaluation"
+  }
+}
