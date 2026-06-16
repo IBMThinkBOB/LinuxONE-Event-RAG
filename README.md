@@ -354,9 +354,22 @@ ollama pull qwen
 
 ## 📚 Documentation
 
+### Core Documentation
+- [`README.md`](README.md) - This file (project overview)
+- [`DOCUMENTATION.md`](DOCUMENTATION.md) - **Complete documentation index and guide**
+- [`QUICKSTART.md`](QUICKSTART.md) - Quick start guide
 - [`ARCHITECTURE.md`](ARCHITECTURE.md) - System architecture and design
-- [`IMPLEMENTATION_GUIDE.md`](IMPLEMENTATION_GUIDE.md) - Detailed implementation steps
+- [`HYBRID_RAG_IMPLEMENTATION.md`](HYBRID_RAG_IMPLEMENTATION.md) - Current implementation details
+- [`LINUXONE_DEPLOYMENT.md`](LINUXONE_DEPLOYMENT.md) - LinuxONE deployment guide
 - [API Documentation](http://localhost:8000/docs) - Interactive API docs
+
+### Additional Documentation
+- [`docs/implementation/`](docs/implementation/) - Implementation history and phase documentation
+- [`docs/plans/`](docs/plans/) - Planning documents and upgrade plans
+- [`docs/troubleshooting/`](docs/troubleshooting/) - Troubleshooting guides
+- [`docs/archive/`](docs/archive/) - Archived documentation
+
+**📖 For complete documentation, see [DOCUMENTATION.md](DOCUMENTATION.md)**
 
 ## 🤝 Contributing
 

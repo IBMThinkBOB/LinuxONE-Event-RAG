@@ -309,14 +309,14 @@ class RetrievalService:
     def _check_relevance_threshold(
         self,
         chunks: List[Dict],
-        min_relevance: float = 0.3
+        min_relevance: float = 0.2
     ) -> tuple:
         """
         Check if top chunks meet minimum relevance threshold.
         
         Args:
             chunks: Retrieved chunks with similarity scores
-            min_relevance: Minimum similarity to consider relevant
+            min_relevance: Minimum similarity to consider relevant (lowered for hybrid RAG)
             
         Returns:
             (is_relevant, top_similarity)
@@ -347,7 +347,7 @@ class RetrievalService:
         min_absolute: float = 0.5,
         relative_threshold: float = 0.8,
         diversity_threshold: float = 0.9,
-        min_relevance: float = 0.3
+        min_relevance: float = 0.2
     ) -> Dict:
         """
         Multi-stage retrieval pipeline with smart relevance checking.
@@ -371,7 +371,7 @@ class RetrievalService:
             min_absolute: Absolute minimum similarity score
             relative_threshold: Relative threshold as fraction of top score
             diversity_threshold: Maximum similarity between kept chunks
-            min_relevance: Minimum similarity for query to be considered relevant
+            min_relevance: Minimum similarity for query to be considered relevant (lowered for hybrid RAG)
             
         Returns:
             Dict with chunks and retrieval metrics

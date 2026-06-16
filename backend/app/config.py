@@ -13,31 +13,32 @@ class Settings(BaseSettings):
     postgres_password: str = "ragpassword"
     postgres_db: str = "linuxone_rag"
     
-    # LLM
+    # LLM (Context-First Hybrid RAG optimized)
     ollama_base_url: str = "http://localhost:11434"
     ollama_model: str = "qwen"
     llm_api_key: str = ""
-    llm_max_tokens: int = 1500
-    llm_temperature: float = 0.3  # Lower for more coherent, complete responses
+    llm_max_tokens: int = 2500  # Increased for detailed, complete answers
+    llm_temperature: float = 0.2  # Balanced for detailed yet focused generation
     
     # Embeddings
     embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
     embedding_dimension: int = 384
     
-    # RAG Configuration
-    chunk_size: int = 300  # Reduced from 500 for better semantic precision
-    chunk_overlap: int = 50
-    top_k_results: int = 5  # Reduced from 10 to prevent context overload
+    # RAG Configurationß
+    chunk_size: int = 600  # Reduced from 500 for better semantic precision | was 300
+    chunk_overlap: int = 100 # was 50
+    top_k_results: int = 10  # Reduced from 10 to prevent context overload | was 5
     max_context_length: int = 2000
     
     # Context Management (prevent LLM overload)
-    max_chunks_to_llm: int = 5  # Hard limit on chunks sent to LLM
+    max_chunks_to_llm: int = 8  # Hard limit on chunks sent to LLM | was 5
     max_context_tokens: int = 1200  # Token budget for context
     
-    # Retrieval Quality Settings
-    min_similarity_absolute: float = 0.5
-    similarity_relative_threshold: float = 0.8
-    diversity_threshold: float = 0.9
+    # Retrieval Quality Settings (Hybrid RAG optimized)
+    min_similarity_absolute: float = 0.4  # Absolute minimum for filtering (was 0.5)
+    similarity_relative_threshold: float = 0.6  # Relative threshold (was 0.8)
+    diversity_threshold: float = 0.95  # Diversity filtering (was 0.9)
+    min_relevance_threshold: float = 0.2  # Minimum for query relevance (lowered for hybrid RAG)
     enable_reranking: bool = True
     enable_adaptive_filtering: bool = True
     enable_diversity_filtering: bool = True

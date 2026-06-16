@@ -32,33 +32,70 @@ class LLMService:
         self,
         query: str,
         context_chunks: List[Dict],
-        max_tokens: int = 1500,
-        temperature: float = 0.15,
-        max_context_tokens: int = 1200
+        max_tokens: int = 2500,
+        temperature: float = 0.2,
+        max_context_tokens: int = 1200,
+        answer_mode: str = "focused",
+        use_evidence_extraction: bool = True
     ) -> Dict:
         """
         Generate response with automatic validation and repair.
         
         Multi-stage pipeline:
-        1. Generate initial answer
-        2. Validate completion integrity
-        3. If incomplete → hidden continuation
-        4. If still incomplete/poor → hidden regeneration
-        5. Return final answer with metadata
+        1. (Optional) Extract structured evidence from chunks
+        2. Generate initial answer
+        3. Validate completion integrity
+        4. If incomplete → hidden continuation
+        5. If still incomplete/poor → hidden regeneration
+        6. Return final answer with metadata
         
         Args:
             query: User's question
             context_chunks: Retrieved chunks with content and metadata
             max_tokens: Maximum tokens to generate
-            temperature: Sampling temperature (0.0 to 1.0, default 0.15 for stability)
+            temperature: Sampling temperature
             max_context_tokens: Maximum tokens for context
+            answer_mode: 'comprehensive' for structured answers, 'focused' for specific answers
+            use_evidence_extraction: Whether to extract structured evidence from chunks
             
         Returns:
             Dictionary with answer, metadata, and repair strategy
         """
+        # Optional: Extract structured evidence
+        evidence_list = None
+        if use_evidence_extraction:
+            try:
+                from app.services.evidence_service import get_evidence_service
+                evidence_service = get_evidence_service()
+                evidence_list = evidence_service.extract_evidence_from_chunks(
+                    context_chunks, query, use_llm=False
+                )
+                evidence_summary = evidence_service.get_evidence_summary(evidence_list)
+                logger.info(
+                    f"[Evidence] Extracted {evidence_summary['total_facts']} facts "
+                    f"from {evidence_summary['sources_with_facts']}/{evidence_summary['total_sources']} sources"
+                )
+            except Exception as e:
+                logger.warning(f"[Evidence] Extraction failed: {e}, falling back to raw chunks")
+                evidence_list = None
+        
         # Enforce token budget
         context_chunks = self._enforce_token_budget(context_chunks, max_context_tokens)
         context_tokens = self._calculate_context_tokens(context_chunks)
+        
+        logger.info(
+            f"[LLM] Starting generation: {len(context_chunks)} chunks, "
+            f"~{context_tokens} context tokens, query='{query[:50]}...', "
+            f"evidence_extraction={'enabled' if evidence_list else 'disabled'}"
+        )
+        
+        # Stage 1: Initial generation
+        initial_result = self._generate_initial_answer(
+            query, context_chunks, max_tokens, temperature, answer_mode, evidence_list
+        )
+        
+        answer = initial_result['answer']
+        done_reason = initial_result.get('done_reason')
         
         logger.info(
             f"[LLM] Starting generation: {len(context_chunks)} chunks, "
@@ -67,7 +104,7 @@ class LLMService:
         
         # Stage 1: Initial generation
         initial_result = self._generate_initial_answer(
-            query, context_chunks, max_tokens, temperature
+            query, context_chunks, max_tokens, temperature, answer_mode
         )
         
         answer = initial_result['answer']
@@ -154,10 +191,12 @@ class LLMService:
         query: str,
         context_chunks: List[Dict],
         max_tokens: int,
-        temperature: float
+        temperature: float,
+        answer_mode: str = "focused",
+        evidence_list: Optional[List[Dict]] = None
     ) -> Dict:
-        """Generate initial answer with strict source grounding."""
-        prompt = self._build_prompt(query, context_chunks)
+        """Generate initial answer with structured evidence or raw chunks."""
+        prompt = self._build_prompt(query, context_chunks, answer_mode, evidence_list)
         
         try:
             response = requests.post(
@@ -292,7 +331,7 @@ class LLMService:
                         "num_predict": max_tokens,
                         "temperature": max(0.1, temperature - 0.05),  # Even lower
                         "top_p": 0.85,
-                        "repeat_penalty": 1.15
+                        "repeat_penalty": 1.2
                     }
                 },
                 timeout=60
@@ -422,64 +461,106 @@ class LLMService:
         
         return partial + continuation
     
-    def _build_prompt(self, query: str, context_chunks: List[Dict]) -> str:
+    def _build_prompt(
+        self,
+        query: str,
+        context_chunks: List[Dict],
+        answer_mode: str = "focused",
+        evidence_list: Optional[List[Dict]] = None
+    ) -> str:
         """
-        Build initial answer prompt with strict source grounding.
+        Build initial answer prompt with Hybrid RAG approach.
+        Uses structured evidence if available, otherwise raw chunks.
+        
+        Philosophy: Context-first hybrid where retrieved context enhances answers
+        but doesn't strictly constrain them. LLM can use general knowledge when
+        context is limited.
         
         Args:
             query: User's question
             context_chunks: Retrieved chunks with metadata
+            answer_mode: "comprehensive" for structured answers, "focused" for direct answers
+            evidence_list: Optional structured evidence extracted from chunks
             
         Returns:
             Formatted prompt string
         """
-        # Format context from chunks
-        context_parts = []
-        for i, chunk in enumerate(context_chunks, 1):
-            doc_title = chunk.get('document', {}).get('title', 'Unknown')
-            page_num = chunk.get('page_number', 'N/A')
-            content = chunk.get('content', '')
+        # Use structured evidence if available, otherwise format raw chunks
+        if evidence_list:
+            from app.services.evidence_service import get_evidence_service
+            evidence_service = get_evidence_service()
+            context_text = evidence_service.format_evidence_for_prompt(evidence_list)
+        else:
+            # Format context from raw chunks
+            context_parts = []
+            for i, chunk in enumerate(context_chunks, 1):
+                doc_title = chunk.get('document', {}).get('title', 'Unknown')
+                page_num = chunk.get('page_number', 'N/A')
+                content = chunk.get('content', '')
+                
+                context_parts.append(
+                    f"[Source {i}: {doc_title}, Page {page_num}]\n{content}"
+                )
             
-            context_parts.append(
-                f"[Source {i}: {doc_title}, Page {page_num}]\n{content}"
-            )
+            context_text = "\n\n".join(context_parts)
         
-        context_text = "\n\n".join(context_parts)
-        
-        # Strict evidence-backed prompt
-        prompt = f"""You are LinuxONE Assistant, an evidence-backed assistant for LinuxONE and IBM technologies.
+        if answer_mode == "comprehensive":
+            # Hybrid RAG: Comprehensive mode with structured guidance
+            prompt = f"""You are an expert assistant for IBM LinuxONE with deep knowledge of enterprise computing.
 
-Answer the user's question using ONLY the provided source context.
-Do not invent or infer information that is not supported by the sources.
-If the sources do not contain enough information to answer confidently, say so clearly.
+Answer the user's question about IBM's LinuxONE Mainframe clearly and in detail. If the query seems vague, assume it is talking specifically about IBM's LinuxONE Mainframe.
 
-Context:
+Use the provided context to enhance your answer, but do not rely on it exclusively.
+
+Context from LinuxONE RedBooks:
 {context_text}
 
-User question:
+Question:
 {query}
 
 Instructions:
-- Give a concise but complete answer.
-- Use short paragraphs or bullet points when helpful.
-- Base every claim on the provided sources only.
-- Do not repeat yourself.
-- If the evidence is limited, state that clearly.
-- End with a complete sentence.
-- Do not include filler or meta commentary.
+- Provide a detailed, well-structured explanation
+- Organize with clear sections (Overview, Key Features, Technical Details, Benefits)
+- Use context when relevant and cite sources naturally
+- If context is limited, supplement with general LinuxONE knowledge
+- Focus on LinuxONE-specific information
+- Avoid repetition and prefer clarity over brevity. Combine similar points into one
+
+Answer:"""
+        else:
+            # Hybrid RAG: Focused mode for direct answers
+            prompt = f"""You are an expert assistant for IBM LinuxONE with deep knowledge of enterprise computing.
+
+Answer the user's question clearly and in detail.
+
+Use the provided context to enhance your answer, but do not rely on it exclusively.
+
+Context from LinuxONE RedBooks:
+{context_text}
+
+Question:
+{query}
+
+Instructions:
+- Provide a detailed explanation
+- Use context when relevant
+- If context is limited, use general knowledge
+- Avoid repetition
+- Prefer clarity over brevity
 
 Answer:"""
         
         return prompt
     
     def _build_continuation_prompt(
-        self, 
-        query: str, 
-        context_chunks: List[Dict], 
+        self,
+        query: str,
+        context_chunks: List[Dict],
         partial_answer: str
     ) -> str:
         """
-        Build continuation prompt for truncated answers.
+        Build continuation prompt with hybrid approach.
+        More grounded than initial prompt but still allows general knowledge.
         
         Args:
             query: Original question
@@ -501,26 +582,23 @@ Answer:"""
         
         context_text = "\n\n".join(context_parts)
         
-        prompt = f"""The previous answer was cut off and is incomplete.
+        prompt = f"""Your previous response was cut off. Continue from where you left off.
 
-Use ONLY the source context below and continue the answer from exactly where it stopped.
-
-Context:
+Context from LinuxONE RedBooks:
 {context_text}
 
-User question:
+Question:
 {query}
 
 Partial answer:
 {partial_answer}
 
 Instructions:
-- Continue from the partial answer.
-- Do not restart the answer.
-- Do not repeat prior content.
-- Do not add unsupported information.
-- Finish the answer cleanly.
-- End with a complete sentence.
+- Continue from exactly where you stopped
+- Use the context to enhance your continuation
+- Do NOT restart or repeat prior content
+- Complete your explanation fully
+- End with a complete sentence
 
 Continuation:"""
         
@@ -528,7 +606,8 @@ Continuation:"""
     
     def _build_regenerate_prompt(self, query: str, context_chunks: List[Dict]) -> str:
         """
-        Build stricter regeneration prompt (fallback only).
+        Build regeneration prompt with hybrid approach (fallback only).
+        Slightly more conservative than initial prompt to ensure stability.
         
         Args:
             query: User's question
@@ -549,24 +628,25 @@ Continuation:"""
         
         context_text = "\n\n".join(context_parts)
         
-        prompt = f"""You are LinuxONE Assistant, an evidence-backed assistant for LinuxONE and IBM technologies.
+        prompt = f"""You are an expert assistant for IBM LinuxONE with deep knowledge of enterprise computing.
 
-Generate a stable, complete answer using ONLY the source context below.
-Do not infer unsupported details.
-If the evidence is incomplete, say so clearly.
+Answer the user's question clearly and in detail.
 
-Context:
+Use the provided context to enhance your answer, but do not rely on it exclusively.
+
+Context from LinuxONE RedBooks:
 {context_text}
 
-User question:
+Question:
 {query}
 
 Instructions:
-- Provide a complete answer.
-- Prefer bullet points when the question asks for features, benefits, steps, or categories.
-- Keep the answer grounded in the sources.
-- Do not repeat yourself.
-- End with a complete sentence.
+- Provide a complete and detailed answer
+- Use context when relevant and cite sources naturally
+- If context is limited, supplement with general LinuxONE knowledge
+- Focus on LinuxONE-specific information
+- Avoid repetition
+- End with a complete sentence
 
 Answer:"""
         

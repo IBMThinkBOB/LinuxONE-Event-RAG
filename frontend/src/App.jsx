@@ -249,7 +249,6 @@ function App() {
             >
               <Tab label="Ask" value="ask" />
               <Tab label="Explore" value="explore" />
-              <Tab label="Compare" value="compare" disabled />
             </Tabs>
           </Toolbar>
         </AppBar>

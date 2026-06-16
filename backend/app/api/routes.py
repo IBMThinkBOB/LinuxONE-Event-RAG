@@ -43,14 +43,25 @@ async def query_knowledge_base(
     try:
         logger.info(f"Processing query: {request.query}")
         
+        # Import query utilities
+        from app.utils.query_utils import expand_query, get_answer_mode
+        
+        # Detect if query is vague and expand for better retrieval
+        expanded_query = expand_query(request.query)
+        answer_mode = get_answer_mode(request.query)
+        
+        if expanded_query != request.query:
+            logger.info(f"Vague query detected - expanding for retrieval")
+            logger.info(f"Answer mode: {answer_mode}")
+        
         # Get services
         embedding_service = get_embedding_service(settings.embedding_model)
         llm_service = get_llm_service(settings.ollama_base_url, settings.ollama_model)
         retrieval_service = RetrievalService(db)
         
-        # Generate query embedding
+        # Generate query embedding using EXPANDED query for better retrieval
         logger.info("Generating query embedding...")
-        query_embedding = embedding_service.embed_text(request.query)
+        query_embedding = embedding_service.embed_text(expanded_query)
         
         # Use adaptive top_k if not specified
         # Limit to 5 chunks max to prevent context overload
@@ -77,10 +88,10 @@ async def query_knowledge_base(
         top_similarity = retrieval_metrics.get('top_similarity', 0.0)
         
         if not chunks or confidence == 'none':
-            # Query is truly irrelevant (e.g., "What is Call of Duty?")
+            # Query is truly irrelevant (lowered threshold for hybrid RAG)
             logger.warning(
                 f"Query not relevant to knowledge base: "
-                f"top_similarity={top_similarity:.3f} < 0.3"
+                f"top_similarity={top_similarity:.3f} < 0.2"
             )
             raise HTTPException(
                 status_code=404,
@@ -102,12 +113,13 @@ async def query_knowledge_base(
             f"~{context_size} characters"
         )
         
-        # Generate response using LLM
-        logger.info("Generating LLM response...")
+        # Generate response using LLM with ORIGINAL query and answer mode
+        logger.info(f"Generating LLM response (mode: {answer_mode})...")
         llm_response = llm_service.generate_response(
-            query=request.query,
+            query=request.query,  # Use original query, NOT expanded
             context_chunks=chunks,
-            max_context_tokens=settings.max_context_tokens
+            max_context_tokens=settings.max_context_tokens,
+            answer_mode=answer_mode  # Pass answer mode for structured responses
         )
         
         # Format sources
