@@ -1,0 +1,16 @@
+# LinuxONE Optional AI Dependencies
+# These packages enable local AI features but may require special handling on s390x
+# Install with: pip install -r requirements-ai.txt
+# Note: Some packages may need source builds or alternative versions on s390x
+
+# ML & Embeddings (for local embedding generation)
+sentence-transformers==2.2.2
+torch==2.1.1
+transformers==4.35.2
+scikit-learn==1.3.2
+
+# PDF Processing (for document ingestion)
+PyMuPDF==1.23.8
+
+# Tokenization (for chunking)
+tiktoken==0.5.2

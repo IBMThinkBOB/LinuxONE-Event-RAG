@@ -26,16 +26,28 @@ app = FastAPI(
 )
 
 # CORS middleware configuration
+# Dynamically configure based on environment
+import os
+
+allowed_origins = [
+    "http://localhost:3000",
+    "http://localhost:5173",  # Vite default port
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:5173"
+]
+
+# Add production frontend URL if configured
+if settings.frontend_url:
+    allowed_origins.append(settings.frontend_url)
+    # Also add without trailing slash if present
+    if settings.frontend_url.endswith('/'):
+        allowed_origins.append(settings.frontend_url.rstrip('/'))
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:5173",  # Vite default port
-        "http://127.0.0.1:3000",
-        "http://127.0.0.1:5173"
-    ],
+    allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 

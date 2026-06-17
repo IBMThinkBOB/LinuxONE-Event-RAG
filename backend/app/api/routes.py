@@ -56,7 +56,22 @@ async def query_knowledge_base(
         
         # Get services
         embedding_service = get_embedding_service(settings.embedding_model)
-        llm_service = get_llm_service(settings.ollama_base_url, settings.ollama_model)
+        
+        # Get LLM service based on provider configuration
+        if settings.llm_provider == "external":
+            llm_service = get_llm_service(
+                provider="external",
+                api_key=settings.bob_api_key,
+                base_url=settings.bob_api_base_url,
+                model=settings.bob_model
+            )
+        else:
+            llm_service = get_llm_service(
+                provider="ollama",
+                base_url=settings.ollama_base_url,
+                model=settings.ollama_model
+            )
+        
         retrieval_service = RetrievalService(db)
         
         # Generate query embedding using EXPANDED query for better retrieval
@@ -295,7 +310,20 @@ async def health_check(db: Session = Depends(get_db)):
     
     # Check LLM service
     try:
-        llm_service = get_llm_service(settings.ollama_base_url, settings.ollama_model)
+        if settings.llm_provider == "external":
+            llm_service = get_llm_service(
+                provider="external",
+                api_key=settings.bob_api_key,
+                base_url=settings.bob_api_base_url,
+                model=settings.bob_model
+            )
+        else:
+            llm_service = get_llm_service(
+                provider="ollama",
+                base_url=settings.ollama_base_url,
+                model=settings.ollama_model
+            )
+        
         if llm_service.check_availability():
             health_status["llm"] = "available"
         else:

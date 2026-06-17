@@ -31,9 +31,13 @@ ENV/
 *.swo
 *~
 
-# Environment
+# Environment variables (NEVER commit sensitive data)
+.env
 .env.local
 .env.*.local
+.env.development
+.env.production
+.env.test
 
 # Database
 *.db

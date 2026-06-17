@@ -1,0 +1,62 @@
+# LinuxONE RAG Backend Service
+# 
+# Installation:
+#   sudo cp deploy/systemd/linuxone-rag-backend.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable linuxone-rag-backend
+#   sudo systemctl start linuxone-rag-backend
+#
+# Management:
+#   sudo systemctl status linuxone-rag-backend
+#   sudo systemctl restart linuxone-rag-backend
+#   sudo journalctl -u linuxone-rag-backend -f
+
+[Unit]
+Description=LinuxONE RAG Knowledge Assistant Backend
+Documentation=https://github.com/your-org/LinuxONERAGPipeline
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=linuxone-rag
+Group=linuxone-rag
+WorkingDirectory=/opt/linuxone-rag/backend
+
+# Environment
+Environment="PATH=/opt/linuxone-rag/venv/bin:/usr/local/bin:/usr/bin:/bin"
+EnvironmentFile=/opt/linuxone-rag/.env
+
+# Start command with uvicorn
+ExecStart=/opt/linuxone-rag/venv/bin/uvicorn app.main:app \
+    --host 0.0.0.0 \
+    --port 8000 \
+    --workers 4 \
+    --log-level info \
+    --access-log \
+    --use-colors
+
+# Restart policy
+Restart=always
+RestartSec=10
+StartLimitInterval=200
+StartLimitBurst=5
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=4096
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=linuxone-rag-backend
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/linuxone-rag/backend
+
+[Install]
+WantedBy=multi-user.target

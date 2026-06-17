@@ -1,5 +1,4 @@
 from typing import List, Dict
-import tiktoken
 
 
 class TextChunker:
@@ -15,10 +14,16 @@ class TextChunker:
         """
         self.chunk_size = chunk_size
         self.overlap = overlap
+        
+        # Lazy import tiktoken - optional dependency
         try:
+            import tiktoken
             self.encoding = tiktoken.get_encoding("cl100k_base")
+        except ImportError:
+            # Graceful fallback to word-based chunking
+            self.encoding = None
         except Exception:
-            # Fallback if tiktoken fails
+            # Fallback if tiktoken fails for other reasons
             self.encoding = None
     
     def chunk_text(self, text: str, metadata: Dict = None) -> List[Dict]:

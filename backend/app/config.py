@@ -13,10 +13,20 @@ class Settings(BaseSettings):
     postgres_password: str = "ragpassword"
     postgres_db: str = "linuxone_rag"
     
-    # LLM (Context-First Hybrid RAG optimized)
+    # LLM Provider Configuration
+    llm_provider: str = "external"  # "external" or "ollama"
+    
+    # External LLM (BOB API) - Primary for LinuxONE
+    bob_api_key: str = ""
+    bob_api_base_url: str = "https://api.bob.build/v1"
+    bob_model: str = "gpt-4o-mini"  # or gpt-4, claude-3-5-sonnet, etc.
+    
+    # Ollama (Local) - Fallback/Development
     ollama_base_url: str = "http://localhost:11434"
     ollama_model: str = "qwen"
-    llm_api_key: str = ""
+    
+    # LLM Generation Settings (Context-First Hybrid RAG optimized)
+    llm_api_key: str = ""  # Deprecated - use bob_api_key
     llm_max_tokens: int = 2500  # Increased for detailed, complete answers
     llm_temperature: float = 0.2  # Balanced for detailed yet focused generation
     
@@ -48,6 +58,12 @@ class Settings(BaseSettings):
     backend_host: str = "0.0.0.0"
     backend_port: int = 8000
     frontend_port: int = 3000
+    frontend_url: str = ""  # For CORS in production
+    
+    # Feature Flags (LinuxONE Production)
+    enable_local_embeddings: bool = True  # Set to False if using external embedding service
+    enable_local_reranking: bool = True  # Set to False to disable reranking
+    enable_pdf_processing: bool = True  # Set to False if PDF processing not needed
     
     class Config:
         # Look for .env in project root (parent of backend directory)

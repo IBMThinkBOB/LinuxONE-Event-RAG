@@ -6,7 +6,6 @@ query-chunk pairs together, providing more accurate semantic relevance scores th
 bi-encoder embeddings alone.
 """
 
-from sentence_transformers import CrossEncoder
 from typing import List, Dict, Optional
 import logging
 import numpy as np
@@ -30,11 +29,23 @@ class RerankingService:
         self._load_model()
     
     def _load_model(self):
-        """Load the cross-encoder model."""
+        """Load the cross-encoder model with lazy import."""
         try:
+            # Lazy import - only load when reranking is needed
+            from sentence_transformers import CrossEncoder
+            
             logger.info(f"Loading cross-encoder model: {self.model_name}")
             self.model = CrossEncoder(self.model_name)
             logger.info("Cross-encoder model loaded successfully")
+        except ImportError as e:
+            logger.error(
+                "sentence-transformers not installed. "
+                "Install with: pip install -r requirements-ai.txt"
+            )
+            raise RuntimeError(
+                "Reranking requires sentence-transformers. "
+                "Install AI dependencies or disable reranking."
+            ) from e
         except Exception as e:
             logger.error(f"Error loading cross-encoder model: {e}")
             raise

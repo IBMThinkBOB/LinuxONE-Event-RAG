@@ -1,4 +1,3 @@
-import fitz  # PyMuPDF
 from typing import List, Dict, Optional
 import re
 from pathlib import Path
@@ -12,7 +11,7 @@ class DocumentProcessor:
     
     def load_pdf(self, file_path: str) -> Dict:
         """
-        Load and extract text from PDF.
+        Load and extract text from PDF with lazy import.
         
         Args:
             file_path: Path to the PDF file
@@ -20,6 +19,15 @@ class DocumentProcessor:
         Returns:
             Dictionary containing pages and metadata
         """
+        try:
+            # Lazy import - only load when PDF processing is needed
+            import fitz  # PyMuPDF
+        except ImportError as e:
+            raise RuntimeError(
+                "PyMuPDF not installed. PDF processing requires AI dependencies. "
+                "Install with: pip install -r requirements-ai.txt"
+            ) from e
+        
         doc = fitz.open(file_path)
         
         pages = []

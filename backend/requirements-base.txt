@@ -1,0 +1,20 @@
+# LinuxONE Production Runtime Dependencies
+# These are the minimal packages needed to run the backend on s390x architecture
+# Install with: pip install -r requirements-base.txt
+
+# Web Framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+
+# Database
+psycopg2-binary==2.9.9
+sqlalchemy==2.0.23
+pgvector==0.2.4
+
+# Utilities
+python-dotenv==1.0.0
+pydantic==2.5.0
+pydantic-settings==2.1.0
+requests==2.31.0
+numpy==1.26.2

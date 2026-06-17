@@ -1,4 +1,3 @@
-from sentence_transformers import SentenceTransformer
 from typing import List, Union
 import numpy as np
 from functools import lru_cache
@@ -23,12 +22,24 @@ class EmbeddingService:
         self._load_model()
     
     def _load_model(self):
-        """Load the embedding model."""
+        """Load the embedding model with lazy import."""
         try:
+            # Lazy import - only load when actually needed
+            from sentence_transformers import SentenceTransformer
+            
             logger.info(f"Loading embedding model: {self.model_name}")
             self.model = SentenceTransformer(self.model_name)
             self.dimension = self.model.get_sentence_embedding_dimension()
             logger.info(f"Model loaded successfully. Embedding dimension: {self.dimension}")
+        except ImportError as e:
+            logger.error(
+                "sentence-transformers not installed. "
+                "Install with: pip install -r requirements-ai.txt"
+            )
+            raise RuntimeError(
+                "Local embedding generation requires sentence-transformers. "
+                "Install AI dependencies or use external embedding service."
+            ) from e
         except Exception as e:
             logger.error(f"Failed to load embedding model: {e}")
             raise

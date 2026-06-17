@@ -6,6 +6,98 @@ import re
 logger = logging.getLogger(__name__)
 
 
+class ExternalLLMProvider:
+    """
+    External LLM provider using OpenAI-compatible API (BOB API).
+    Supports GPT-4, Claude, and other models via unified interface.
+    """
+    
+    def __init__(self, api_key: str, base_url: str = "https://api.bob.build/v1", model: str = "gpt-4o-mini"):
+        """
+        Initialize external LLM provider.
+        
+        Args:
+            api_key: API key for authentication
+            base_url: Base URL for API endpoint
+            model: Model name (gpt-4, gpt-4o-mini, claude-3-5-sonnet, etc.)
+        """
+        self.api_key = api_key
+        self.base_url = base_url.rstrip('/')
+        self.model = model
+        
+        if not self.api_key:
+            raise ValueError("API key is required for external LLM provider")
+    
+    def generate(self, prompt: str, max_tokens: int = 2500, temperature: float = 0.2) -> Dict:
+        """
+        Generate response using external API.
+        
+        Args:
+            prompt: Input prompt
+            max_tokens: Maximum tokens to generate
+            temperature: Sampling temperature
+            
+        Returns:
+            Dictionary with response and metadata
+        """
+        try:
+            response = requests.post(
+                f"{self.base_url}/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {self.api_key}",
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "model": self.model,
+                    "messages": [
+                        {"role": "user", "content": prompt}
+                    ],
+                    "max_tokens": max_tokens,
+                    "temperature": temperature,
+                    "top_p": 0.9
+                },
+                timeout=120
+            )
+            
+            if response.status_code != 200:
+                logger.error(f"External LLM API error: {response.status_code} - {response.text}")
+                raise Exception(f"External LLM API error: {response.text}")
+            
+            result = response.json()
+            
+            # Extract response from OpenAI-compatible format
+            answer = result['choices'][0]['message']['content']
+            finish_reason = result['choices'][0].get('finish_reason', 'stop')
+            
+            return {
+                'answer': answer,
+                'done': finish_reason == 'stop',
+                'done_reason': finish_reason,
+                'prompt_tokens': result.get('usage', {}).get('prompt_tokens', 0),
+                'completion_tokens': result.get('usage', {}).get('completion_tokens', 0),
+                'total_tokens': result.get('usage', {}).get('total_tokens', 0)
+            }
+        except requests.exceptions.Timeout:
+            logger.error("External LLM request timed out")
+            raise Exception("External LLM request timed out. Please try again.")
+        except Exception as e:
+            logger.error(f"Error calling external LLM: {e}")
+            raise
+    
+    def check_availability(self) -> bool:
+        """Check if external LLM service is available."""
+        try:
+            response = requests.get(
+                f"{self.base_url}/models",
+                headers={"Authorization": f"Bearer {self.api_key}"},
+                timeout=5
+            )
+            return response.status_code == 200
+        except Exception as e:
+            logger.warning(f"External LLM service not available: {e}")
+            return False
+
+
 class LLMService:
     """
     Production-grade LLM service with completion validation and repair.
@@ -15,18 +107,35 @@ class LLMService:
     2. Completion integrity validation
     3. Hidden continuation for truncated answers
     4. Conditional hidden regeneration as fallback
+    
+    Supports both Ollama (local) and external API providers.
     """
     
-    def __init__(self, base_url: str = "http://localhost:11434", model: str = "qwen"):
+    def __init__(self, provider: str = "ollama", **kwargs):
         """
-        Initialize the LLM service.
+        Initialize the LLM service with specified provider.
         
         Args:
-            base_url: Base URL for Ollama API
-            model: Model name to use (e.g., 'qwen')
+            provider: "ollama" or "external"
+            **kwargs: Provider-specific configuration
+                For ollama: base_url, model
+                For external: api_key, base_url, model
         """
-        self.base_url = base_url
-        self.model = model
+        self.provider_type = provider
+        
+        if provider == "external":
+            self.provider = ExternalLLMProvider(
+                api_key=kwargs.get('api_key', ''),
+                base_url=kwargs.get('base_url', 'https://api.bob.build/v1'),
+                model=kwargs.get('model', 'gpt-4o-mini')
+            )
+            self.model = kwargs.get('model', 'gpt-4o-mini')
+        elif provider == "ollama":
+            self.provider = None  # Use direct Ollama calls
+            self.base_url = kwargs.get('base_url', 'http://localhost:11434')
+            self.model = kwargs.get('model', 'qwen')
+        else:
+            raise ValueError(f"Unknown provider: {provider}. Use 'ollama' or 'external'")
     
     def generate_response(
         self,
@@ -199,36 +308,42 @@ class LLMService:
         prompt = self._build_prompt(query, context_chunks, answer_mode, evidence_list)
         
         try:
-            response = requests.post(
-                f"{self.base_url}/api/generate",
-                json={
-                    "model": self.model,
-                    "prompt": prompt,
-                    "stream": False,
-                    "options": {
-                        "num_predict": max_tokens,
-                        "temperature": temperature,  # Use parameter, not hardcoded
-                        "top_p": 0.9,
-                        "repeat_penalty": 1.15
-                    }
-                },
-                timeout=60
-            )
-            
-            if response.status_code != 200:
-                logger.error(f"LLM API error: {response.status_code} - {response.text}")
-                raise Exception(f"LLM API error: {response.text}")
-            
-            result = response.json()
-            
-            return {
-                'answer': result['response'],
-                'done': result.get('done', True),
-                'done_reason': result.get('done_reason'),
-                'prompt_tokens': result.get('prompt_eval_count', 0),
-                'completion_tokens': result.get('eval_count', 0),
-                'total_tokens': result.get('prompt_eval_count', 0) + result.get('eval_count', 0)
-            }
+            if self.provider_type == "external":
+                # Use external API provider
+                result = self.provider.generate(prompt, max_tokens, temperature)
+                return result
+            else:
+                # Use Ollama
+                response = requests.post(
+                    f"{self.base_url}/api/generate",
+                    json={
+                        "model": self.model,
+                        "prompt": prompt,
+                        "stream": False,
+                        "options": {
+                            "num_predict": max_tokens,
+                            "temperature": temperature,
+                            "top_p": 0.9,
+                            "repeat_penalty": 1.15
+                        }
+                    },
+                    timeout=60
+                )
+                
+                if response.status_code != 200:
+                    logger.error(f"LLM API error: {response.status_code} - {response.text}")
+                    raise Exception(f"LLM API error: {response.text}")
+                
+                result = response.json()
+                
+                return {
+                    'answer': result['response'],
+                    'done': result.get('done', True),
+                    'done_reason': result.get('done_reason'),
+                    'prompt_tokens': result.get('prompt_eval_count', 0),
+                    'completion_tokens': result.get('eval_count', 0),
+                    'total_tokens': result.get('prompt_eval_count', 0) + result.get('eval_count', 0)
+                }
         except requests.exceptions.Timeout:
             logger.error("LLM request timed out")
             raise Exception("LLM request timed out. Please try again.")
@@ -707,8 +822,11 @@ Answer:"""
             True if service is available, False otherwise
         """
         try:
-            response = requests.get(f"{self.base_url}/api/tags", timeout=5)
-            return response.status_code == 200
+            if self.provider_type == "external":
+                return self.provider.check_availability()
+            else:
+                response = requests.get(f"{self.base_url}/api/tags", timeout=5)
+                return response.status_code == 200
         except Exception as e:
             logger.warning(f"LLM service not available: {e}")
             return False
@@ -742,20 +860,28 @@ Answer:"""
 _llm_service = None
 
 
-def get_llm_service(base_url: str = "http://localhost:11434", model: str = "qwen") -> LLMService:
+def get_llm_service(provider: str = "ollama", **kwargs) -> LLMService:
     """
     Get or create the global LLM service instance.
     
     Args:
-        base_url: Base URL for Ollama API
-        model: Model name to use
+        provider: "ollama" or "external"
+        **kwargs: Provider-specific configuration
+            For ollama: base_url, model
+            For external: api_key, base_url, model
         
     Returns:
         LLMService instance
     """
     global _llm_service
     if _llm_service is None:
-        _llm_service = LLMService(base_url, model)
+        _llm_service = LLMService(provider=provider, **kwargs)
     return _llm_service
+
+
+# Backward compatibility wrapper
+def get_llm_service_legacy(base_url: str = "http://localhost:11434", model: str = "qwen") -> LLMService:
+    """Legacy function for backward compatibility."""
+    return get_llm_service(provider="ollama", base_url=base_url, model=model)
 
 # Made with Bob
