@@ -27,12 +27,12 @@ class Settings(BaseSettings):
     # RAG Configurationß
     chunk_size: int = 600  # Reduced from 500 for better semantic precision | was 300
     chunk_overlap: int = 100 # was 50
-    top_k_results: int = 10  # Reduced from 10 to prevent context overload | was 5
+    top_k_results: int = 10
     max_context_length: int = 2000
     
-    # Context Management (prevent LLM overload)
-    max_chunks_to_llm: int = 8  # Hard limit on chunks sent to LLM | was 5
-    max_context_tokens: int = 1200  # Token budget for context
+    # Context Management
+    max_chunks_to_llm: int = 8  # Hard limit on chunks sent to LLM
+    max_context_tokens: int = 3000  # Raised from 1200 — was starving LinuxONE answers
     
     # Retrieval Quality Settings (Hybrid RAG optimized)
     min_similarity_absolute: float = 0.4  # Absolute minimum for filtering (was 0.5)

@@ -1,217 +1,133 @@
-import React, { useState } from 'react';
-import { Box, Typography, Grid, Card, CardContent, CardActionArea, Chip } from '@mui/material';
+import React from 'react';
 import {
-  ShieldCheckIcon,
-  BoltIcon,
-  CpuChipIcon,
-  CubeIcon,
-  ServerIcon
-} from '@heroicons/react/24/outline';
+  Grid,
+  Column,
+  ClickableTile,
+  Tag,
+} from '@carbon/react';
+import {
+  Security,
+  Flash,
+  MachineLearning,
+  ServerDns,
+  VirtualMachine,
+} from '@carbon/icons-react';
 
-const ExplorePage = ({ onTopicSelect, onQuerySubmit }) => {
-  const categories = [
-    {
-      id: 'security',
-      title: 'Security',
-      icon: ShieldCheckIcon,
-      color: '#10B981',
-      description: 'Explore encryption, compliance, and threat protection',
-      topics: [
-        'How does LinuxONE ensure data security?',
-        'What encryption features are available?',
-        'Secure container implementation',
-        'Compliance and regulatory features'
-      ]
-    },
-    {
-      id: 'performance',
-      title: 'Performance',
-      icon: BoltIcon,
-      color: '#F59E0B',
-      description: 'Learn about optimization and benchmarks',
-      topics: [
-        'Performance optimization techniques',
-        'Workload performance benchmarks',
-        'Resource utilization best practices',
-        'Scaling strategies'
-      ]
-    },
-    {
-      id: 'ai',
-      title: 'AI Workloads',
-      icon: CpuChipIcon,
-      color: '#E07A2A',
-      description: 'Discover AI frameworks and deployment strategies',
-      topics: [
-        'Supported AI frameworks',
-        'Deploying AI models on LinuxONE',
-        'AI workload optimization',
-        'Machine learning best practices'
-      ]
-    },
-    {
-      id: 'architecture',
-      title: 'Architecture',
-      icon: ServerIcon,
-      color: '#6366F1',
-      description: 'Understand system design and components',
-      topics: [
-        'LinuxONE system architecture',
-        'Hardware capabilities',
-        'System design principles',
-        'Infrastructure planning'
-      ]
-    },
-    {
-      id: 'virtualization',
-      title: 'Virtualization',
-      icon: CubeIcon,
-      color: '#8B5CF6',
-      description: 'Master containers and virtual machines',
-      topics: [
-        'Container orchestration with Kubernetes',
-        'Virtual machine management',
-        'Containerization benefits',
-        'Hybrid cloud strategies'
-      ]
-    }
-  ];
+const categories = [
+  {
+    id: 'security',
+    title: 'Security',
+    Icon: Security,
+    tagType: 'green',
+    description: 'Explore encryption, compliance, and threat protection',
+    topics: [
+      'How does LinuxONE ensure data security?',
+      'What encryption features are available?',
+      'Secure container implementation',
+      'Compliance and regulatory features',
+    ],
+  },
+  {
+    id: 'performance',
+    title: 'Performance',
+    Icon: Flash,
+    tagType: 'teal',
+    description: 'Learn about optimization and benchmarks',
+    topics: [
+      'Performance optimization techniques',
+      'Workload performance benchmarks',
+      'Resource utilization best practices',
+      'Scaling strategies',
+    ],
+  },
+  {
+    id: 'ai',
+    title: 'AI Workloads',
+    Icon: MachineLearning,
+    tagType: 'blue',
+    description: 'Discover AI frameworks and deployment strategies',
+    topics: [
+      'Supported AI frameworks',
+      'Deploying AI models on LinuxONE',
+      'AI workload optimization',
+      'Machine learning best practices',
+    ],
+  },
+  {
+    id: 'architecture',
+    title: 'Architecture',
+    Icon: ServerDns,
+    tagType: 'gray',
+    description: 'Understand system design and components',
+    topics: [
+      'LinuxONE system architecture',
+      'Hardware capabilities',
+      'System design principles',
+      'Infrastructure planning',
+    ],
+  },
+  {
+    id: 'virtualization',
+    title: 'Virtualization',
+    Icon: VirtualMachine,
+    tagType: 'purple',
+    description: 'Master containers and virtual machines',
+    topics: [
+      'Container orchestration with Kubernetes',
+      'Virtual machine management',
+      'Containerization benefits',
+      'Hybrid cloud strategies',
+    ],
+  },
+];
 
-  const handleTopicClick = (topic) => {
-    if (onQuerySubmit) {
-      onQuerySubmit(topic, null);
-    }
-  };
-
+const ExplorePage = ({ onQuerySubmit }) => {
   return (
-    <Box>
+    <div>
       {/* Header */}
-      <Box sx={{ mb: 4, textAlign: 'center' }}>
-        <Typography
-          variant="h4"
-          gutterBottom
-          sx={{
-            color: 'text.primary',
-            fontWeight: 600,
-            mb: 1,
-          }}
-        >
-          Explore LinuxONE Knowledge
-        </Typography>
-        <Typography
-          variant="body1"
-          sx={{
-            color: 'text.secondary',
-            maxWidth: '600px',
-            margin: '0 auto',
-          }}
-        >
+      <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+        <h2 className="cds--type-productive-heading-04">Explore LinuxONE Knowledge</h2>
+        <p className="cds--type-body-long-01" style={{ color: 'var(--cds-text-secondary)', maxWidth: 560, margin: '0.5rem auto 0' }}>
           Browse curated topics and discover insights about LinuxONE capabilities
-        </Typography>
-      </Box>
+        </p>
+      </div>
 
-      {/* Category Grid */}
-      <Grid container spacing={3}>
-        {categories.map((category) => {
-          const IconComponent = category.icon;
-          return (
-            <Grid item xs={12} md={6} key={category.id}>
-              <Card
-                elevation={1}
-                sx={{
-                  height: '100%',
-                  border: '1px solid',
-                  borderColor: 'divider',
-                  borderRadius: '14px',
-                  transition: 'all 0.2s ease-in-out',
-                  '&:hover': {
-                    borderColor: category.color,
-                    boxShadow: `0 8px 24px ${category.color}20`,
-                    transform: 'translateY(-4px)',
-                  },
-                }}
-              >
-                <CardContent sx={{ p: 3 }}>
-                  {/* Category Header */}
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                    <Box
-                      sx={{
-                        width: 48,
-                        height: 48,
-                        borderRadius: '12px',
-                        backgroundColor: `${category.color}15`,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      <IconComponent style={{ width: 24, height: 24, color: category.color }} />
-                    </Box>
-                    <Box>
-                      <Typography
-                        variant="h6"
-                        sx={{
-                          fontWeight: 600,
-                          color: 'text.primary',
-                          mb: 0.5,
-                        }}
-                      >
-                        {category.title}
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: 'text.secondary',
-                          fontSize: '0.875rem',
-                        }}
-                      >
-                        {category.description}
-                      </Typography>
-                    </Box>
-                  </Box>
+      {/* Category grid */}
+      <Grid narrow>
+        {categories.map(({ id, title, Icon, tagType, description, topics }) => (
+          <Column key={id} sm={4} md={4} lg={8} style={{ marginBottom: '1rem' }}>
+            <div style={{
+              background: 'var(--cds-layer-01, #f4f4f4)',
+              border: '1px solid var(--cds-border-subtle-01, #e0e0e0)',
+              padding: '1.25rem',
+              height: '100%',
+            }}>
+              {/* Category header */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+                <Icon size={24} />
+                <div>
+                  <p className="cds--type-body-short-02" style={{ fontWeight: 600, margin: 0 }}>{title}</p>
+                  <p className="cds--type-helper-text-01" style={{ color: 'var(--cds-text-secondary)', margin: 0 }}>{description}</p>
+                </div>
+              </div>
 
-                  {/* Topic Chips */}
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    {category.topics.map((topic, index) => (
-                      <Chip
-                        key={index}
-                        label={topic}
-                        onClick={() => handleTopicClick(topic)}
-                        sx={{
-                          cursor: 'pointer',
-                          justifyContent: 'flex-start',
-                          height: 'auto',
-                          py: 1,
-                          px: 1.5,
-                          backgroundColor: '#FAFAFA',
-                          border: '1px solid',
-                          borderColor: 'divider',
-                          borderRadius: '8px',
-                          fontSize: '0.8125rem',
-                          fontWeight: 400,
-                          color: 'text.secondary',
-                          transition: 'all 0.2s ease-in-out',
-                          '& .MuiChip-label': {
-                            whiteSpace: 'normal',
-                            textAlign: 'left',
-                          },
-                          '&:hover': {
-                            backgroundColor: `${category.color}10`,
-                            borderColor: category.color,
-                            color: category.color,
-                            transform: 'translateX(4px)',
-                          },
-                        }}
-                      />
-                    ))}
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
-          );
-        })}
+              {/* Topics */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {topics.map((topic, i) => (
+                  <ClickableTile
+                    key={i}
+                    onClick={() => onQuerySubmit && onQuerySubmit(topic, null)}
+                    style={{ padding: '0.5rem 0.75rem' }}
+                  >
+                    <span className="cds--type-body-short-01">{topic}</span>
+                  </ClickableTile>
+                ))}
+              </div>
+            </div>
+          </Column>
+        ))}
       </Grid>
-    </Box>
+    </div>
   );
 };
 

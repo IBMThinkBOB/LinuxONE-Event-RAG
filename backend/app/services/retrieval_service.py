@@ -158,24 +158,11 @@ class RetrievalService:
         # Apply relative threshold
         filtered = [c for c in filtered if c.get(score_key, 0) >= relative_min]
         
-        # Detect score gaps (drop after 20% drop from previous)
-        final_chunks = [filtered[0]]  # Always keep top chunk
-        for i in range(1, len(filtered)):
-            prev_score = filtered[i-1].get(score_key, 0)
-            curr_score = filtered[i].get(score_key, 0)
-            
-            # If score drops more than 20%, stop
-            if curr_score < prev_score * 0.8:
-                logger.info(f"Score gap detected at position {i}: {prev_score:.3f} -> {curr_score:.3f}")
-                break
-            
-            final_chunks.append(filtered[i])
-        
         logger.info(
-            f"Adaptive filter: {len(chunks)} → {len(final_chunks)} chunks "
+            f"Adaptive filter: {len(chunks)} → {len(filtered)} chunks "
             f"(absolute>{min_absolute}, relative>{relative_min:.3f})"
         )
-        return final_chunks
+        return filtered
     
     def filter_by_diversity(
         self,
@@ -475,22 +462,18 @@ class RetrievalService:
         # Stage 4: Diversity filtering with hard limit
         if enable_diversity and candidates:
             logger.info("Stage 4: Applying diversity filter")
-            # Hard limit: never more than 5 chunks to LLM to prevent context overload
-            safe_max_chunks = min(top_k, 5)
             candidates = self.filter_by_diversity(
                 candidates,
                 similarity_threshold=diversity_threshold,
-                max_chunks=safe_max_chunks
+                max_chunks=top_k
             )
-            logger.info(f"Enforced hard limit: {len(candidates)} chunks (max={safe_max_chunks})")
             metrics['pipeline_stages'].append({
                 'stage': 'diversity_filter',
                 'chunks': len(candidates)
             })
         else:
-            # Just limit to safe maximum (5 chunks)
-            candidates = candidates[:5]
-            logger.info(f"No diversity filter: limited to {len(candidates)} chunks (hard max=5)")
+            candidates = candidates[:top_k]
+            logger.info(f"No diversity filter: limited to {len(candidates)} chunks (max={top_k})")
         
         metrics['final_chunks'] = len(candidates)
         

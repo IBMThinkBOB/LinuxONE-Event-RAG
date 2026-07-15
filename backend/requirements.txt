@@ -17,6 +17,9 @@ scikit-learn==1.3.2
 # PDF Processing
 PyMuPDF==1.23.8
 
+# HTML Processing
+trafilatura
+
 # Utilities
 python-dotenv==1.0.0
 pydantic==2.5.0

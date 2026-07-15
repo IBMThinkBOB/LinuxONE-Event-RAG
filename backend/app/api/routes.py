@@ -63,9 +63,8 @@ async def query_knowledge_base(
         logger.info("Generating query embedding...")
         query_embedding = embedding_service.embed_text(expanded_query)
         
-        # Use adaptive top_k if not specified
-        # Limit to 5 chunks max to prevent context overload
-        adaptive_top_k = request.top_k if request.top_k else 5
+        # Use requested top_k, falling back to the configured default
+        adaptive_top_k = request.top_k if request.top_k else settings.top_k_results
         logger.info(f"Retrieving chunks with enhanced pipeline (adaptive_top_k={adaptive_top_k})...")
         retrieval_result = retrieval_service.search_with_reranking(
             query=request.query,

@@ -154,7 +154,10 @@ class DocumentProcessor:
             'kubernetes', 'docker', 'cloud', 'hybrid', 'encryption',
             'resilience', 'availability', 'disaster recovery', 'backup',
             'database', 'postgresql', 'db2', 'analytics', 'data',
-            'enterprise', 'infrastructure', 'architecture', 'deployment'
+            'enterprise', 'infrastructure', 'architecture', 'deployment',
+            # IBM MQ keywords
+            'mq', 'ibm mq', 'queue manager', 'channel', 'message broker',
+            'topic', 'subscription', 'clustering', 'high availability', 'tls',
         }
         
         # Convert text to lowercase for matching

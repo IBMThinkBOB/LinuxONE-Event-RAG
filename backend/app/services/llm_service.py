@@ -36,7 +36,7 @@ class LLMService:
         temperature: float = 0.2,
         max_context_tokens: int = 1200,
         answer_mode: str = "focused",
-        use_evidence_extraction: bool = True
+        use_evidence_extraction: bool = False
     ) -> Dict:
         """
         Generate response with automatic validation and repair.
@@ -92,19 +92,6 @@ class LLMService:
         # Stage 1: Initial generation
         initial_result = self._generate_initial_answer(
             query, context_chunks, max_tokens, temperature, answer_mode, evidence_list
-        )
-        
-        answer = initial_result['answer']
-        done_reason = initial_result.get('done_reason')
-        
-        logger.info(
-            f"[LLM] Starting generation: {len(context_chunks)} chunks, "
-            f"~{context_tokens} context tokens, query='{query[:50]}...'"
-        )
-        
-        # Stage 1: Initial generation
-        initial_result = self._generate_initial_answer(
-            query, context_chunks, max_tokens, temperature, answer_mode
         )
         
         answer = initial_result['answer']
@@ -508,7 +495,7 @@ class LLMService:
             # Hybrid RAG: Comprehensive mode with structured guidance
             prompt = f"""You are an expert assistant for IBM LinuxONE with deep knowledge of enterprise computing.
 
-Answer the user's question about IBM's LinuxONE Mainframe clearly and in detail. If the query seems vague, assume it is talking specifically about IBM's LinuxONE Mainframe.
+Answer the user's question about IBM's LinuxONE Mainframe in depth. If the query seems vague, assume it refers specifically to IBM's LinuxONE Mainframe platform.
 
 Use the provided context to enhance your answer, but do not rely on it exclusively.
 
@@ -519,19 +506,20 @@ Question:
 {query}
 
 Instructions:
-- Provide a detailed, well-structured explanation
-- Organize with clear sections (Overview, Key Features, Technical Details, Benefits)
+- Write a thorough, multi-paragraph response — do not stop after one or two sentences
+- Organize with clear sections: Overview, Key Features, Technical Details, Use Cases, Benefits
+- Each section should contain multiple sentences with concrete details
 - Use context when relevant and cite sources naturally
-- If context is limited, supplement with general LinuxONE knowledge
+- Supplement with general LinuxONE knowledge where context is limited
 - Focus on LinuxONE-specific information
-- Avoid repetition and prefer clarity over brevity. Combine similar points into one
+- Avoid repetition; combine similar points into one
 
 Answer:"""
         else:
             # Hybrid RAG: Focused mode for direct answers
             prompt = f"""You are an expert assistant for IBM LinuxONE with deep knowledge of enterprise computing.
 
-Answer the user's question clearly and in detail.
+Answer the user's question clearly and in depth — do not give a one-sentence summary.
 
 Use the provided context to enhance your answer, but do not rely on it exclusively.
 
@@ -542,11 +530,11 @@ Question:
 {query}
 
 Instructions:
-- Provide a detailed explanation
+- Write at least 3–5 sentences with specific, concrete details
 - Use context when relevant
-- If context is limited, use general knowledge
+- Supplement with general LinuxONE knowledge if context is limited
 - Avoid repetition
-- Prefer clarity over brevity
+- Prefer depth and clarity over brevity
 
 Answer:"""
         

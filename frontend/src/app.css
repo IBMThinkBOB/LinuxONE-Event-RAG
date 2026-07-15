@@ -1,0 +1,160 @@
+/* IBM Carbon layout overrides */
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--cds-background, #f4f4f4);
+}
+
+/* Carbon Content sits below the 48px fixed header */
+.app-content.cds--content {
+  padding: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  margin-top: 48px; /* Carbon header is position:fixed */
+}
+
+/* Ask view: fill height, flex column */
+.ask-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Scrollable message area */
+.message-area {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.message-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1rem 1rem;
+}
+
+/* Hero */
+.hero {
+  text-align: center;
+  margin-bottom: 2.5rem;
+  padding-top: 2rem;
+}
+
+.hero-sub {
+  color: var(--cds-text-secondary, #525252);
+  max-width: 560px;
+  margin: 0.75rem auto 0;
+}
+
+/* Message rows */
+.msg-row {
+  margin-bottom: 1.5rem;
+}
+
+/* Loading bubble */
+.loading-bubble {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: var(--cds-layer-01, #f4f4f4);
+  border: 1px solid var(--cds-border-subtle-01, #e0e0e0);
+  margin-bottom: 1.5rem;
+}
+
+.loading-title {
+  font-weight: 600;
+  color: var(--cds-text-primary, #161616);
+  margin: 0 0 0.25rem;
+}
+
+/* Pinned composer bar */
+.composer-bar {
+  flex-shrink: 0;
+  border-top: 1px solid var(--cds-border-subtle-01, #e0e0e0);
+  background: var(--cds-background, #ffffff);
+  padding: 1rem 0;
+}
+
+.composer-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Explore wrapper */
+.explore-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+/* Carbon Header active nav item */
+.cds--header__menu-item--current,
+.cds--header__menu-item[aria-current="page"] {
+  border-bottom: 3px solid var(--cds-border-interactive, #0f62fe);
+}
+
+/* Markdown content in answer panel */
+.answer-markdown p {
+  margin-bottom: 0.75rem;
+  line-height: 1.7;
+  color: var(--cds-text-primary, #161616);
+}
+.answer-markdown p:last-child { margin-bottom: 0; }
+.answer-markdown ul,
+.answer-markdown ol {
+  padding-left: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+.answer-markdown li {
+  margin-bottom: 0.375rem;
+  line-height: 1.6;
+}
+.answer-markdown code {
+  background: var(--cds-layer-02, #e0e0e0);
+  color: var(--cds-text-primary, #161616);
+  padding: 2px 5px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.875em;
+}
+.answer-markdown pre {
+  background: var(--cds-layer-01, #f4f4f4);
+  border: 1px solid var(--cds-border-subtle-01, #e0e0e0);
+  padding: 1rem;
+  overflow-x: auto;
+  margin-bottom: 0.75rem;
+}
+.answer-markdown pre code {
+  background: transparent;
+  padding: 0;
+}
+.answer-markdown strong {
+  font-weight: 600;
+  color: var(--cds-text-primary, #161616);
+}
+.answer-markdown h1,
+.answer-markdown h2,
+.answer-markdown h3,
+.answer-markdown h4 {
+  font-weight: 600;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  color: var(--cds-text-primary, #161616);
+}
+.answer-markdown h1 { font-size: 1.5rem; }
+.answer-markdown h2 { font-size: 1.25rem; }
+.answer-markdown h3 { font-size: 1.125rem; }
+.answer-markdown h1:first-child,
+.answer-markdown h2:first-child,
+.answer-markdown h3:first-child { margin-top: 0; }
+.answer-markdown blockquote {
+  border-left: 3px solid var(--cds-border-interactive, #0f62fe);
+  padding-left: 1rem;
+  margin-left: 0;
+  color: var(--cds-text-secondary, #525252);
+  font-style: italic;
+}

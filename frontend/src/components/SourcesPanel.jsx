@@ -1,171 +1,77 @@
 import React, { useState } from 'react';
 import {
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  Chip,
-  IconButton,
-  Collapse
-} from '@mui/material';
-import {
-  ChevronDownIcon,
-  ChevronUpIcon,
-  DocumentTextIcon
-} from '@heroicons/react/24/outline';
+  Accordion,
+  AccordionItem,
+  Tag,
+} from '@carbon/react';
+import { Document } from '@carbon/icons-react';
 
 const SourcesPanel = ({ sources }) => {
-  const [expandedSources, setExpandedSources] = useState({});
-
-  const toggleSource = (index) => {
-    setExpandedSources(prev => ({
-      ...prev,
-      [index]: !prev[index]
-    }));
-  };
-
   if (!sources || sources.length === 0) {
     return (
-      <Box sx={{ textAlign: 'center', py: 4 }}>
-        <DocumentTextIcon
-          style={{
-            width: 48,
-            height: 48,
-            color: '#E5E7EB',
-            marginBottom: 16,
-          }}
-        />
-        <Typography variant="body2" color="text.secondary">
+      <div style={{ textAlign: 'center', padding: '2rem 0' }}>
+        <Document size={48} style={{ color: 'var(--cds-icon-disabled)', marginBottom: '0.75rem' }} />
+        <p className="cds--type-body-short-01" style={{ color: 'var(--cds-text-secondary)' }}>
           No sources available
-        </Typography>
-      </Box>
+        </p>
+      </div>
     );
   }
 
-  return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      {sources.map((source, index) => (
-        <Card
-          key={index}
-          variant="outlined"
-          sx={{
-            backgroundColor: '#FAFAFA',
-            borderColor: 'divider',
-            borderRadius: '10px',
-            transition: 'all 0.2s ease-in-out',
-            '&:hover': {
-              backgroundColor: '#FFFFFF',
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
-            },
-          }}
-        >
-          <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
-            {/* Source Header */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1.5 }}>
-              <Typography
-                variant="subtitle2"
-                sx={{
-                  fontWeight: 600,
-                  color: 'text.primary',
-                  flex: 1,
-                  pr: 2,
-                  fontSize: '0.875rem',
-                }}
-              >
-                {index + 1}. {source.title}
-              </Typography>
-              <Chip
-                label={`${(source.similarity * 100).toFixed(1)}%`}
-                size="small"
-                sx={{
-                  backgroundColor: source.similarity > 0.8 ? '#10B981' :
-                                  source.similarity > 0.6 ? '#E07A2A' : '#F59E0B',
-                  color: 'white',
-                  fontWeight: 600,
-                  height: '22px',
-                  fontSize: '0.7rem',
-                }}
-              />
-            </Box>
+  const getMatchTag = (sim) => {
+    if (sim > 0.8) return 'green';
+    if (sim > 0.6) return 'teal';
+    return 'warm-gray';
+  };
 
-            {/* Source Metadata */}
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontSize: '0.8125rem' }}>
-              📄 {source.filename}
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 2, mb: 1 }}>
+  return (
+    <Accordion>
+      {sources.map((source, index) => (
+        <AccordionItem
+          key={index}
+          title={
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
+              <span className="cds--type-body-short-02" style={{ fontWeight: 600 }}>
+                {index + 1}. {source.title}
+              </span>
+              <Tag type={getMatchTag(source.similarity)} size="sm">
+                {(source.similarity * 100).toFixed(1)}% match
+              </Tag>
+            </div>
+          }
+        >
+          <div style={{ paddingBottom: '0.75rem' }}>
+            <p className="cds--type-helper-text-01" style={{ color: 'var(--cds-text-secondary)', marginBottom: '0.375rem' }}>
+              {source.filename}
+            </p>
+            <div style={{ display: 'flex', gap: '1rem' }}>
               {source.page_number && (
-                <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
-                  📖 Page {source.page_number}
-                </Typography>
+                <span className="cds--type-helper-text-01" style={{ color: 'var(--cds-text-secondary)' }}>
+                  Page {source.page_number}
+                </span>
               )}
               {source.section && (
-                <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
-                  📑 {source.section}
-                </Typography>
+                <span className="cds--type-helper-text-01" style={{ color: 'var(--cds-text-secondary)' }}>
+                  {source.section}
+                </span>
               )}
-            </Box>
-
-            {/* Expandable Content Preview */}
+            </div>
             {source.content && (
-              <>
-                <IconButton
-                  size="small"
-                  onClick={() => toggleSource(index)}
-                  sx={{
-                    mt: 0.5,
-                    color: 'primary.main',
-                    padding: '4px',
-                    '&:hover': {
-                      backgroundColor: 'rgba(224, 122, 42, 0.08)',
-                    },
-                  }}
-                >
-                  {expandedSources[index] ? (
-                    <ChevronUpIcon style={{ width: 18, height: 18 }} />
-                  ) : (
-                    <ChevronDownIcon style={{ width: 18, height: 18 }} />
-                  )}
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      ml: 0.5,
-                      fontSize: '0.75rem',
-                      fontWeight: 500,
-                    }}
-                  >
-                    {expandedSources[index] ? 'Hide' : 'Show'} excerpt
-                  </Typography>
-                </IconButton>
-                <Collapse in={expandedSources[index]}>
-                  <Box
-                    sx={{
-                      mt: 1.5,
-                      p: 2,
-                      backgroundColor: '#FFFFFF',
-                      borderRadius: '8px',
-                      border: '1px solid',
-                      borderColor: 'divider',
-                    }}
-                  >
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontStyle: 'italic',
-                        color: 'text.secondary',
-                        lineHeight: 1.6,
-                        fontSize: '0.8125rem',
-                      }}
-                    >
-                      {source.content}
-                    </Typography>
-                  </Box>
-                </Collapse>
-              </>
+              <div style={{
+                marginTop: '0.75rem',
+                padding: '0.75rem',
+                background: 'var(--cds-layer-02, #e0e0e0)',
+                borderLeft: '3px solid var(--cds-border-interactive, #0f62fe)',
+              }}>
+                <p className="cds--type-body-short-01" style={{ fontStyle: 'italic', color: 'var(--cds-text-secondary)', margin: 0 }}>
+                  {source.content}
+                </p>
+              </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </AccordionItem>
       ))}
-    </Box>
+    </Accordion>
   );
 };
 

@@ -1,70 +1,36 @@
 import React from 'react';
-import { Box, Typography, Chip } from '@mui/material';
-import { LightBulbIcon } from '@heroicons/react/24/outline';
+import { Tag } from '@carbon/react';
+import { Idea } from '@carbon/icons-react';
 
-const FollowUpSuggestions = ({ suggestions, onSuggestionClick, loading }) => {
-  if (!suggestions || suggestions.length === 0) {
-    return null;
-  }
+const FollowUpSuggestions = ({ suggestions, onSuggestionClick }) => {
+  if (!suggestions || suggestions.length === 0) return null;
 
   return (
-    <Box
-      sx={{
-        mt: 3,
-        p: 2.5,
-        backgroundColor: '#FEF3E7',
-        borderRadius: '12px',
-        border: '1px solid #F2A863',
-      }}
-    >
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-        <LightBulbIcon style={{ width: 18, height: 18, color: '#E07A2A' }} />
-        <Typography
-          variant="body2"
-          sx={{
-            fontWeight: 600,
-            color: '#B85F1F',
-            fontSize: '0.875rem',
-          }}
-        >
+    <div style={{
+      marginTop: '1rem',
+      padding: '0.875rem 1rem',
+      background: 'var(--cds-layer-02, #e0e0e0)',
+      borderLeft: '3px solid var(--cds-border-interactive, #0f62fe)',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.625rem' }}>
+        <Idea size={16} />
+        <span className="cds--type-helper-text-01" style={{ fontWeight: 600, color: 'var(--cds-text-secondary)' }}>
           Continue exploring
-        </Typography>
-      </Box>
-      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-        {suggestions.map((suggestion, index) => (
-          <Chip
-            key={index}
-            label={suggestion}
+        </span>
+      </div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+        {suggestions.map((suggestion, i) => (
+          <Tag
+            key={i}
+            type="blue"
             onClick={() => onSuggestionClick && onSuggestionClick(suggestion)}
-            disabled={loading}
-            sx={{
-              cursor: 'pointer',
-              backgroundColor: 'white',
-              border: '1px solid #F2A863',
-              borderRadius: '999px',
-              color: '#B85F1F',
-              fontSize: '0.8125rem',
-              fontWeight: 500,
-              height: '32px',
-              transition: 'all 0.2s ease-in-out',
-              '&:hover': {
-                backgroundColor: '#E07A2A',
-                color: 'white',
-                borderColor: '#E07A2A',
-                transform: 'translateY(-2px)',
-                boxShadow: '0 4px 8px rgba(224, 122, 42, 0.2)',
-              },
-              '&:active': {
-                transform: 'translateY(0)',
-              },
-              '&.Mui-disabled': {
-                opacity: 0.5,
-              },
-            }}
-          />
+            style={{ cursor: 'pointer' }}
+          >
+            {suggestion}
+          </Tag>
         ))}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 };
 

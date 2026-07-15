@@ -1,0 +1,35 @@
+# IBM MQ Documentation URL Seed List
+# One URL per line. Lines starting with # are ignored by the ingestion script.
+# Grouped by category. Version annotations are included as comments above each URL.
+#
+# Usage:
+#   python backend/scripts/ingest_mq_docs.py --sources data/mq_docs/sources.txt
+
+# ─── Installation & Downloads ───────────────────────────────────────────────
+# v10.0 — Install / uninstall workflow (procedure)
+https://www.ibm.com/docs/en/ibm-mq/10.0.x?topic=migrating-installing-uninstalling
+# v10.0 — MQ downloads page (procedure)
+https://www.ibm.com/docs/en/ibm-mq/10.0.x?topic=information-mq-downloads
+
+# ─── Getting Started ─────────────────────────────────────────────────────────
+# v10.0 — Getting started scenarios (procedure)
+https://www.ibm.com/docs/en/ibm-mq/10.0.x?topic=scenarios-getting-started-mq
+# v9.4 — Quick Start guide (procedure)
+https://www.ibm.com/docs/en/ibm-mq/9.4.x?topic=mq-94-quick-start-guide
+
+# ─── GUI / MQ Explorer ───────────────────────────────────────────────────────
+# v9.3 — MQ Explorer tutorials (procedure + GUI)
+https://www.ibm.com/docs/en/ibm-mq/9.3.x?topic=explorer-mq-tutorials
+# v9.4 — MQ Explorer overview (concept + GUI)
+https://www.ibm.com/docs/en/ibm-mq/9.4.x?topic=mq-explorer
+# v9.3 — Configuring MQ via Explorer (procedure + GUI)
+https://www.ibm.com/docs/en/ibm-mq/9.3.x?topic=explorer-configuring-mq
+
+# ─── Tutorials ───────────────────────────────────────────────────────────────
+# IBM Developer — MQ tutorials hub (concept, varied formats)
+https://developer.ibm.com/components/ibm-mq/tutorials/
+
+# ─── Documentation Root ──────────────────────────────────────────────────────
+# IBM MQ product documentation landing — JS-rendered shell, no extractable prose.
+# Kept for reference; the ingestion script skips it gracefully.
+# https://www.ibm.com/docs/en/ibm-mq

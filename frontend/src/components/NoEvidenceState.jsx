@@ -1,150 +1,50 @@
 import React from 'react';
-import { Box, Typography, Chip, Paper } from '@mui/material';
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { InlineNotification, Tag, Button } from '@carbon/react';
 
 const NoEvidenceState = ({ onSuggestionClick }) => {
   const suggestions = [
-    "LinuxONE architecture",
-    "LinuxONE security",
-    "LinuxONE AI workloads",
-    "LinuxONE resiliency"
+    'LinuxONE architecture',
+    'LinuxONE security',
+    'LinuxONE AI workloads',
+    'LinuxONE resiliency',
   ];
 
   return (
-    <Paper
-      elevation={1}
-      sx={{
-        backgroundColor: 'background.paper',
-        borderRadius: '14px',
-        border: '1px solid',
-        borderColor: 'divider',
-        p: 4,
-        textAlign: 'center',
-      }}
-    >
-      <Box
-        sx={{
-          width: 64,
-          height: 64,
-          borderRadius: '50%',
-          backgroundColor: '#FEF3E7',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          margin: '0 auto 24px',
-        }}
-      >
-        <MagnifyingGlassIcon style={{ width: 32, height: 32, color: '#E07A2A' }} />
-      </Box>
+    <div>
+      <InlineNotification
+        kind="warning"
+        title="No source-backed answer found"
+        subtitle="I couldn't find relevant information in the indexed LinuxONE documentation for that question."
+        hideCloseButton
+        lowContrast
+      />
+      <div style={{ marginTop: '1rem', padding: '1rem', background: 'var(--cds-layer-01, #f4f4f4)', border: '1px solid var(--cds-border-subtle-01, #e0e0e0)' }}>
+        <p className="cds--type-body-short-02" style={{ fontWeight: 600, marginBottom: '0.5rem' }}>
+          Try these tips:
+        </p>
+        <ul className="cds--type-body-short-01" style={{ paddingLeft: '1.25rem', color: 'var(--cds-text-secondary)', marginBottom: '1rem' }}>
+          <li>Rephrase your question with different keywords</li>
+          <li>Be more specific about what you're looking for</li>
+          <li>Use technical terms from LinuxONE documentation</li>
+        </ul>
 
-      <Typography
-        variant="h6"
-        sx={{
-          fontWeight: 600,
-          color: 'text.primary',
-          mb: 1.5,
-          fontSize: '1.125rem',
-        }}
-      >
-        No source-backed answer found
-      </Typography>
-
-      <Typography
-        variant="body2"
-        sx={{
-          color: 'text.secondary',
-          mb: 2,
-          maxWidth: '480px',
-          margin: '0 auto 16px',
-          lineHeight: 1.6,
-        }}
-      >
-        I couldn't find relevant information in the indexed LinuxONE documentation for that question.
-      </Typography>
-
-      {/* Helpful Tips */}
-      <Box
-        sx={{
-          mb: 3,
-          p: 2,
-          backgroundColor: '#F8F9FA',
-          borderRadius: '10px',
-          maxWidth: '480px',
-          margin: '0 auto 24px',
-          textAlign: 'left',
-        }}
-      >
-        <Typography
-          variant="body2"
-          sx={{
-            fontWeight: 600,
-            color: 'text.primary',
-            mb: 1,
-            fontSize: '0.875rem',
-          }}
-        >
-          💡 Try these tips:
-        </Typography>
-        <Box component="ul" sx={{ m: 0, pl: 2.5, color: 'text.secondary' }}>
-          <Typography component="li" variant="body2" sx={{ mb: 0.5, fontSize: '0.8125rem' }}>
-            Rephrase your question with different keywords
-          </Typography>
-          <Typography component="li" variant="body2" sx={{ mb: 0.5, fontSize: '0.8125rem' }}>
-            Be more specific about what you're looking for
-          </Typography>
-          <Typography component="li" variant="body2" sx={{ fontSize: '0.8125rem' }}>
-            Use technical terms from LinuxONE documentation
-          </Typography>
-        </Box>
-      </Box>
-
-      <Box>
-        <Typography
-          variant="body2"
-          sx={{
-            fontWeight: 600,
-            color: 'text.primary',
-            mb: 1.5,
-            fontSize: '0.875rem',
-          }}
-        >
+        <p className="cds--type-body-short-02" style={{ fontWeight: 600, marginBottom: '0.5rem' }}>
           Or explore these topics:
-        </Typography>
-        <Box
-          sx={{
-            display: 'flex',
-            gap: 1,
-            flexWrap: 'wrap',
-            justifyContent: 'center',
-          }}
-        >
-          {suggestions.map((suggestion, index) => (
-            <Chip
-              key={index}
-              label={suggestion}
-              onClick={() => onSuggestionClick && onSuggestionClick(suggestion)}
-              sx={{
-                cursor: 'pointer',
-                backgroundColor: '#FEF3E7',
-                border: '1px solid #F2A863',
-                borderRadius: '999px',
-                color: '#B85F1F',
-                fontSize: '0.8125rem',
-                fontWeight: 500,
-                height: '32px',
-                transition: 'all 0.2s ease-in-out',
-                '&:hover': {
-                  backgroundColor: '#F2A863',
-                  color: 'white',
-                  borderColor: '#E07A2A',
-                  transform: 'translateY(-1px)',
-                },
-              }}
-            />
+        </p>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+          {suggestions.map((s, i) => (
+            <Tag
+              key={i}
+              type="blue"
+              onClick={() => onSuggestionClick && onSuggestionClick(s)}
+              style={{ cursor: 'pointer' }}
+            >
+              {s}
+            </Tag>
           ))}
-        </Box>
-      </Box>
-    </Paper>
+        </div>
+      </div>
+    </div>
   );
 };
 
