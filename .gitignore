@@ -65,7 +65,7 @@ coverage/
 docker-compose.override.yml
 
 # Models (large files)
-models/
+data/models/
 *.bin
 *.pt
 *.pth
