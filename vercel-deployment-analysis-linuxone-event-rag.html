@@ -1,0 +1,332 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Vercel Deployment Analysis</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #1f2328;
+    background: #ffffff;
+    padding: 2rem 1rem;
+  }
+  .page { max-width: 760px; margin: 0 auto; }
+  h1 { font-size: 1.5rem; font-weight: 600; margin-bottom: 0.25rem; color: #1f2328; }
+  .subtitle { color: #57606a; font-size: 0.875rem; margin-bottom: 2rem; }
+  h2 { font-size: 1.05rem; font-weight: 600; margin: 2rem 0 0.75rem; color: #1f2328; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.4rem; }
+  h3 { font-size: 0.9rem; font-weight: 600; margin: 1.25rem 0 0.4rem; color: #1f2328; }
+  p { margin-bottom: 0.75rem; color: #1f2328; }
+  ul { padding-left: 1.25rem; margin-bottom: 0.75rem; }
+  li { margin-bottom: 0.3rem; }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    vertical-align: middle;
+    margin-left: 6px;
+  }
+  .badge-green  { background: #dcfce7; color: #166534; }
+  .badge-red    { background: #fee2e2; color: #991b1b; }
+  .badge-yellow { background: #fef9c3; color: #854d0e; }
+  .badge-blue   { background: #dbeafe; color: #1d4ed8; }
+  .badge-gray   { background: #f1f5f9; color: #475569; }
+
+  .verdict-box {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 1.25rem 0;
+  }
+  .verdict-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 1rem;
+    background: #f7f8fa;
+  }
+  .verdict-card .label { font-size: 0.75rem; font-weight: 600; color: #57606a; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.35rem; }
+  .verdict-card .result { font-size: 1rem; font-weight: 700; }
+  .result-yes    { color: #16a34a; }
+  .result-no     { color: #dc2626; }
+  .result-partial{ color: #d97706; }
+
+  table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; font-size: 0.8125rem; }
+  th { background: #f7f8fa; text-align: left; padding: 7px 10px; border: 1px solid #e5e7eb; font-weight: 600; color: #57606a; }
+  td { padding: 7px 10px; border: 1px solid #e5e7eb; vertical-align: top; }
+  tr:nth-child(even) td { background: #fafafa; }
+
+  code {
+    font-family: "SFMono-Regular", Consolas, monospace;
+    font-size: 0.8em;
+    background: #f1f5f9;
+    border: 1px solid #e5e7eb;
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: #1f2328;
+  }
+  pre {
+    background: #f7f8fa;
+    border: 1px solid #e5e7eb;
+    border-radius: 5px;
+    padding: 0.75rem 1rem;
+    overflow-x: auto;
+    font-size: 0.8125rem;
+    font-family: "SFMono-Regular", Consolas, monospace;
+    margin-bottom: 0.75rem;
+    color: #1f2328;
+    white-space: pre;
+  }
+  .blocker {
+    border-left: 3px solid #dc2626;
+    background: #fff5f5;
+    padding: 0.6rem 0.85rem;
+    margin-bottom: 0.6rem;
+    border-radius: 0 4px 4px 0;
+  }
+  .blocker strong { color: #991b1b; }
+  .note {
+    border-left: 3px solid #3b82d4;
+    background: #eff6ff;
+    padding: 0.6rem 0.85rem;
+    margin-bottom: 0.6rem;
+    border-radius: 0 4px 4px 0;
+  }
+  .warn {
+    border-left: 3px solid #d97706;
+    background: #fffbeb;
+    padding: 0.6rem 0.85rem;
+    margin-bottom: 0.6rem;
+    border-radius: 0 4px 4px 0;
+  }
+  .file-ref { color: #3b82d4; font-family: monospace; font-size: 0.8em; }
+  .section-rule { border: none; border-top: 1px solid #e5e7eb; margin: 2rem 0 1rem; }
+  footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #e5e7eb; text-align: center; font-size: 0.75rem; color: #57606a; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1>Vercel Deployment Analysis</h1>
+  <p class="subtitle">Repository: github.com/IBMThinkBOB/LinuxONE-Event-RAG  ·  Analysed 15 Jul 2025</p>
+
+  
+  <div class="verdict-box">
+    <div class="verdict-card">
+      <div class="label">Frontend on Vercel</div>
+      <div class="result result-yes">✓ Yes — as-is</div>
+      <p style="font-size:0.8rem;margin-top:0.4rem;color:#57606a">Vite/React SPA, static build, no server required.</p>
+    </div>
+    <div class="verdict-card">
+      <div class="label">Backend on Vercel</div>
+      <div class="result result-no">✗ No — hard blockers</div>
+      <p style="font-size:0.8rem;margin-top:0.4rem;color:#57606a">Requires local Ollama, pgvector, 500 MB+ ML models, and persistent state.</p>
+    </div>
+  </div>
+  <div class="note">
+    <strong>Recommended architecture:</strong> Deploy frontend to Vercel. Host the backend + Ollama on a long-running server (IBM LinuxONE, Fly.io, Railway, Render, or a VPS). The frontend's <code>/api</code> proxy just needs to point at the backend URL.
+  </div>
+
+  <hr class="section-rule" />
+
+  
+  <h2>1. Frontend</h2>
+  <table>
+    <tr><th>Property</th><th>Value</th></tr>
+    <tr><td>Framework</td><td>React 18.2 + Vite 5.0 (SPA)</td></tr>
+    <tr><td>UI Library</td><td>IBM Carbon React <code>@carbon/react</code> + <code>@carbon/icons-react</code></td></tr>
+    <tr><td>Build command</td><td><code>npm run build</code> → <code>vite build</code></td></tr>
+    <tr><td>Output directory</td><td><code>frontend/dist/</code></td></tr>
+    <tr><td>Dev port</td><td>3000 (proxy <code>/api → localhost:8000</code>)</td></tr>
+    <tr><td>Vercel root directory</td><td>Set to <code>frontend</code></td></tr>
+    <tr><td>vercel.json needed?</td><td>Only to set <code>VITE_API_URL</code> env var for the backend URL</td></tr>
+  </table>
+
+  <h3>vite.config.js <span class="file-ref">frontend/vite.config.js</span></h3>
+  <pre>export default defineConfig({
+  plugins: [react()],
+  server: {
+    port: 3000,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8000',  // ← dev only, not built into dist
+        changeOrigin: true,
+      }
+    }
+  }
+})</pre>
+  <div class="note">The proxy is a dev-server feature only. The built <code>dist/</code> makes direct API calls. You'll need to set <code>VITE_API_BASE_URL</code> to your backend's public URL before building for production.</div>
+
+  <h3>Minimal vercel.json for frontend</h3>
+  <pre>{
+  "version": 2,
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}</pre>
+
+  <hr class="section-rule" />
+
+  
+  <h2>2. Backend</h2>
+  <table>
+    <tr><th>Property</th><th>Value</th></tr>
+    <tr><td>Framework</td><td>FastAPI 0.104.1 + Uvicorn 0.24.0</td></tr>
+    <tr><td>Entrypoint</td><td><code>backend/app/main.py</code></td></tr>
+    <tr><td>Start command</td><td><code>uvicorn app.main:app --host 0.0.0.0 --port 8000</code></td></tr>
+    <tr><td>vercel.json present?</td><td><span class="badge badge-red">No</span></td></tr>
+    <tr><td>Serverless-compatible?</td><td><span class="badge badge-red">No</span> — see blockers below</td></tr>
+    <tr><td>API routes</td><td><code>POST /api/query</code>, <code>GET /api/documents</code>, <code>GET /api/statistics</code>, <code>GET /api/health</code></td></tr>
+  </table>
+
+  <h3>Why the backend cannot run on Vercel serverless</h3>
+  <div class="blocker"><strong>Blocker 1 — Ollama dependency:</strong> Every query calls <code>http://localhost:11434/api/generate</code>. Ollama is a separate process that must be running on the same host. Vercel Functions have no sidecar processes.</div>
+  <div class="blocker"><strong>Blocker 2 — ML model bundle size:</strong> <code>sentence-transformers/all-MiniLM-L6-v2</code> (~90 MB) and <code>cross-encoder/ms-marco-MiniLM-L-6-v2</code> (+90 MB) are downloaded at startup. Vercel's function bundle limit is 50 MB (250 MB compressed). PyTorch alone exceeds this.</div>
+  <div class="blocker"><strong>Blocker 3 — PostgreSQL + pgvector:</strong> The backend requires a running PostgreSQL 15+ instance with the <code>vector</code> extension enabled and an HNSW index. Vercel has no built-in Postgres with pgvector (Vercel Postgres is vanilla).</div>
+  <div class="blocker"><strong>Blocker 4 — Execution timeout:</strong> Vercel serverless functions time out at 60 s (Hobby) / 300 s (Pro). A single RAG query involves embedding generation + reranking + LLM inference, which typically takes 15–120 s depending on Qwen model size.</div>
+  <div class="blocker"><strong>Blocker 5 — No persistent in-memory state:</strong> <code>EmbeddingService</code> and <code>RerankingService</code> are cached as global singletons. Serverless functions are stateless and cold-start on every invocation, reloading the 90 MB models each time.</div>
+
+  <hr class="section-rule" />
+
+  
+  <h2>3. Ollama Dependencies</h2>
+  <p>Every file that depends on Ollama, with the relevant code:</p>
+  <table>
+    <tr><th>File</th><th>Dependency</th></tr>
+    <tr>
+      <td><span class="file-ref">backend/app/config.py:17–18</span></td>
+      <td><code>ollama_base_url = "http://localhost:11434"</code><br /><code>ollama_model = "qwen"</code></td>
+    </tr>
+    <tr>
+      <td><span class="file-ref">backend/app/services/llm_service.py:20</span></td>
+      <td><code>def __init__(self, base_url="http://localhost:11434", model="qwen")</code></td>
+    </tr>
+    <tr>
+      <td><span class="file-ref">backend/app/services/llm_service.py</span> (all HTTP calls)</td>
+      <td><code>requests.post(f"{self.base_url}/api/generate", ...)</code></td>
+    </tr>
+    <tr>
+      <td><span class="file-ref">backend/app/api/routes.py:59</span></td>
+      <td><code>llm_service = get_llm_service(settings.ollama_base_url, settings.ollama_model)</code></td>
+    </tr>
+    <tr>
+      <td><span class="file-ref">backend/scripts/evaluate_hybrid_rag.py:187</span></td>
+      <td>Evaluation script calls LLM service directly</td>
+    </tr>
+    <tr>
+      <td><span class="file-ref">qwen_client.py:5</span></td>
+      <td>Standalone test client: <code>http://localhost:11434/api/generate</code></td>
+    </tr>
+  </table>
+  <div class="blocker"><strong>Conclusion:</strong> The backend requires a locally running Ollama server on the same host. It uses raw HTTP (<code>requests.post</code>) to <code>localhost:11434</code> — not a managed API. There is no API key, no cloud endpoint, and no fallback. Ollama must be installed and the Qwen model pulled before the backend can answer any query.</div>
+  <div class="warn"><strong>Possible mitigation:</strong> Replace the Ollama call with an OpenAI-compatible or IBM watsonx API (e.g. <code>ibm-watsonx-ai</code> SDK). This would remove the local-Ollama dependency but requires a cloud LLM account and prompt/token costs.</div>
+
+  <hr class="section-rule" />
+
+  
+  <h2>4. RAG Infrastructure</h2>
+  <table>
+    <tr><th>Question</th><th>Answer</th></tr>
+    <tr>
+      <td>Vector database</td>
+      <td>PostgreSQL 15 + <code>pgvector</code> extension (HNSW index, 384-dim cosine similarity). Defined in <span class="file-ref">backend/scripts/init_db.sql</span>.</td>
+    </tr>
+    <tr>
+      <td>Embeddings stored on disk?</td>
+      <td>No. All embeddings live in the <code>chunks.embedding vector(384)</code> column in PostgreSQL. No flat files.</td>
+    </tr>
+    <tr>
+      <td>Does the app write files locally?</td>
+      <td>Only evaluation/test scripts write JSON reports (<span class="file-ref">evaluate_hybrid_rag.py</span>, <span class="file-ref">evaluate_retrieval.py</span>). The main API does not write to disk.</td>
+    </tr>
+    <tr>
+      <td>Persistent storage required?</td>
+      <td>Yes — PostgreSQL with pgvector must persist the documents and chunk embeddings across restarts. A stateless deployment with ephemeral storage would lose all indexed data.</td>
+    </tr>
+    <tr>
+      <td>Ingestion job limits</td>
+      <td>Yes. Ingestion (<span class="file-ref">backend/scripts/ingest_documents.py</span>) runs PDF parsing + batch embedding generation. For 5 Redbooks the QUICKSTART estimates 5–10 minutes. Serverless functions cannot run for more than 5 minutes.</td>
+    </tr>
+    <tr>
+      <td>Model download at startup</td>
+      <td>Yes. <code>sentence-transformers/all-MiniLM-L6-v2</code> (~90 MB) downloads from HuggingFace Hub on first run. This is unsuitable for cold-start serverless.</td>
+    </tr>
+    <tr>
+      <td>No Dockerfile present?</td>
+      <td>Correct — no Dockerfile in the repo. <code>docker-compose.yml</code> is present but only spins up PostgreSQL. The backend is run directly with <code>uvicorn</code>.</td>
+    </tr>
+  </table>
+
+  <hr class="section-rule" />
+
+  
+  <h2>5. Deployment Assessment</h2>
+
+  <h3>Frontend on Vercel — ✓ Yes, with one env-var change</h3>
+  <ul>
+    <li>Vite builds a static SPA into <code>dist/</code> — Vercel hosts this natively.</li>
+    <li>The <code>/api</code> proxy in <code>vite.config.js</code> is dev-server only and not included in the build.</li>
+    <li>Before building, set <code>VITE_API_BASE_URL=https://your-backend.example.com</code> and update <code>frontend/src/services/api.js</code> to use it.</li>
+    <li>Add a <code>vercel.json</code> (see template above) for SPA routing rewrites.</li>
+  </ul>
+
+  <h3>Backend on Vercel — ✗ No, 5 hard blockers</h3>
+  <ul>
+    <li>Requires a running <strong>Ollama process</strong> on the same machine (no cloud API).</li>
+    <li>Python ML packages (PyTorch, sentence-transformers, scikit-learn) far exceed the 50 MB bundle limit.</li>
+    <li>Needs a <strong>PostgreSQL + pgvector</strong> instance (not Vercel Postgres, which lacks the vector extension).</li>
+    <li>Query latency (embedding + reranking + LLM) can exceed 60 s timeout on Hobby plan.</li>
+    <li>Singleton ML model cache is incompatible with stateless cold-start invocations.</li>
+  </ul>
+
+  <h3>Recommended: Split Deployment</h3>
+  <table>
+    <tr><th>Layer</th><th>Host</th><th>Notes</th></tr>
+    <tr>
+      <td>Frontend (React/Vite)</td>
+      <td><strong>Vercel</strong></td>
+      <td>Static build. Free tier works. Point <code>VITE_API_BASE_URL</code> at backend.</td>
+    </tr>
+    <tr>
+      <td>Backend (FastAPI + Uvicorn)</td>
+      <td>Fly.io / Render / Railway / VPS</td>
+      <td>Needs 2–4 GB RAM for ML models. Always-on container required.</td>
+    </tr>
+    <tr>
+      <td>LLM (Ollama + Qwen)</td>
+      <td>Same VM as backend, or GPU cloud</td>
+      <td>Must be co-located with backend or reachable on private network. <code>OLLAMA_BASE_URL</code> env var controls the endpoint.</td>
+    </tr>
+    <tr>
+      <td>Database (PostgreSQL + pgvector)</td>
+      <td>Supabase / Neon / self-hosted</td>
+      <td>Both Supabase and Neon support the pgvector extension. Set <code>DATABASE_URL</code> env var.</td>
+    </tr>
+  </table>
+  <div class="warn"><strong>If you want cloud LLM:</strong> Swap the Ollama HTTP call in <span class="file-ref">backend/app/services/llm_service.py</span> for an OpenAI-compatible endpoint (e.g. IBM watsonx, together.ai, Groq). The <code>base_url</code> and <code>model</code> are already parameterised via <code>config.py</code> — the change is minimal.</div>
+
+  <hr class="section-rule" />
+
+  
+  <h2>6. Key Files</h2>
+  <table>
+    <tr><th>File</th><th>Purpose</th><th>Present?</th></tr>
+    <tr><td><span class="file-ref">frontend/package.json</span></td><td>Frontend dependencies (Carbon, Vite, React)</td><td><span class="badge badge-green">Yes</span></td></tr>
+    <tr><td><span class="file-ref">frontend/vite.config.js</span></td><td>Vite config with dev proxy</td><td><span class="badge badge-green">Yes</span></td></tr>
+    <tr><td><span class="file-ref">backend/requirements.txt</span></td><td>Python deps (FastAPI, psycopg2, pgvector, torch, sentence-transformers)</td><td><span class="badge badge-green">Yes</span></td></tr>
+    <tr><td><span class="file-ref">pyproject.toml</span></td><td>—</td><td><span class="badge badge-gray">Not present</span></td></tr>
+    <tr><td><span class="file-ref">Dockerfile</span></td><td>—</td><td><span class="badge badge-red">Not present</span></td></tr>
+    <tr><td><span class="file-ref">docker-compose.yml</span></td><td>PostgreSQL + pgvector container only</td><td><span class="badge badge-yellow">Partial</span></td></tr>
+    <tr><td><span class="file-ref">vercel.json</span></td><td>—</td><td><span class="badge badge-red">Not present</span></td></tr>
+    <tr><td><span class="file-ref">backend/app/main.py</span></td><td>FastAPI app + startup init</td><td><span class="badge badge-green">Yes</span></td></tr>
+    <tr><td><span class="file-ref">backend/app/config.py</span></td><td>Pydantic settings (ollama_base_url, database_url, etc.)</td><td><span class="badge badge-green">Yes</span></td></tr>
+  </table>
+
+  <footer>Made with IBM Bob</footer>
+</div>
+</body>
+</html>
