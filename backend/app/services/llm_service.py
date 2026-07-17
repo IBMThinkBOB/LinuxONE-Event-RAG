@@ -27,6 +27,11 @@ class LLMService:
         """
         self.base_url = base_url
         self.model = model
+        # Use a session so every request carries the ngrok bypass header.
+        # This header is a no-op against real Ollama but required when tunnelling
+        # through ngrok's free tier, which otherwise returns 403 for non-browser clients.
+        self._session = requests.Session()
+        self._session.headers.update({"ngrok-skip-browser-warning": "true"})
     
     def generate_response(
         self,
@@ -186,7 +191,7 @@ class LLMService:
         prompt = self._build_prompt(query, context_chunks, answer_mode, evidence_list)
         
         try:
-            response = requests.post(
+            response = self._session.post(
                 f"{self.base_url}/api/generate",
                 json={
                     "model": self.model,
@@ -249,7 +254,7 @@ class LLMService:
         prompt = self._build_continuation_prompt(query, context_chunks, partial_answer)
         
         try:
-            response = requests.post(
+            response = self._session.post(
                 f"{self.base_url}/api/generate",
                 json={
                     "model": self.model,
@@ -308,7 +313,7 @@ class LLMService:
         prompt = self._build_regenerate_prompt(query, context_chunks)
         
         try:
-            response = requests.post(
+            response = self._session.post(
                 f"{self.base_url}/api/generate",
                 json={
                     "model": self.model,
@@ -695,7 +700,7 @@ Answer:"""
             True if service is available, False otherwise
         """
         try:
-            response = requests.get(f"{self.base_url}/api/tags", timeout=5)
+            response = self._session.get(f"{self.base_url}/api/tags", timeout=5)
             return response.status_code == 200
         except Exception as e:
             logger.warning(f"LLM service not available: {e}")
@@ -709,7 +714,7 @@ Answer:"""
             Dictionary with model information or None if unavailable
         """
         try:
-            response = requests.get(f"{self.base_url}/api/tags", timeout=5)
+            response = self._session.get(f"{self.base_url}/api/tags", timeout=5)
             if response.status_code == 200:
                 data = response.json()
                 models = data.get('models', [])
